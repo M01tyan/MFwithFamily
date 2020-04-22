@@ -2,27 +2,27 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" version="4.0">
   <display-name>MFwithFamily</display-name>
   <servlet>
-  	<servlet-name>Home</servlet-name>
-  	<servlet-class>Controller.Home</servlet-class>
+  	<servlet-name>BalanceController</servlet-name>
+  	<servlet-class>Controller.BalanceController</servlet-class>
   </servlet>
   <servlet>
-  	<servlet-name>List</servlet-name>
-  	<servlet-class>Controller.List</servlet-class>
+  	<servlet-name>HouseholdController</servlet-name>
+  	<servlet-class>Controller.HouseholdController</servlet-class>
   </servlet>
-  <!-- <servlet>
-  	<servlet-name>Balance</servlet-name>
-  	<jsp-file>/home.jsp</jsp-file>
-  </servlet> -->
-  <!-- <servlet-mapping>
-  	<servlet-name>Balance</servlet-name>
-  	<url-pattern>/balance</url-pattern>
-  </servlet-mapping> -->
+  <servlet>
+  	<servlet-name>Breakdown</servlet-name>
+  	<servlet-class>Controller.BreakdownController</servlet-class>
+  </servlet>
   <servlet-mapping>
-  	<servlet-name>Home</servlet-name>
-  	<url-pattern>/home</url-pattern>
+  	<servlet-name>BalanceController</servlet-name>
+  	<url-pattern>/balance</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
-  	<servlet-name>List</servlet-name>
-  	<url-pattern>/list</url-pattern>
+  	<servlet-name>HouseholdController</servlet-name>
+  	<url-pattern>/household</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>Breakdown</servlet-name>
+  	<url-pattern>/breakdown</url-pattern>
   </servlet-mapping>
 </web-app>

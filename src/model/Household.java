@@ -1,10 +1,8 @@
 package model;
 
-import java.util.Date;
-
 public class Household {
 	private int target;
-	private Date date;
+	private String date;
 	private String content;
 	private int price;
 	private String financial;
@@ -23,11 +21,11 @@ public class Household {
 		return this.target;
 	}
 
-	@SuppressWarnings("deprecation")
 	public void setDate(String date) {
-		this.date = new Date(date);
+//		System.out.println(date);
+		this.date = date;
 	}
-	public Date getDate() {
+	public String getDate() {
 		return this.date;
 	}
 
@@ -62,7 +60,7 @@ public class Household {
 	public void setMiddleItem(String middleItem) {
 		this.middleItem = middleItem;
 	}
-	public String getMiddelItem() {
+	public String getMiddleItem() {
 		return this.middleItem;
 	}
 
