@@ -13,6 +13,10 @@
   	<servlet-name>Breakdown</servlet-name>
   	<servlet-class>Controller.BreakdownController</servlet-class>
   </servlet>
+  <servlet>
+  	<servlet-name>SignUp</servlet-name>
+  	<servlet-class>Controller.SignUp</servlet-class>
+  </servlet>
   <servlet-mapping>
   	<servlet-name>BalanceController</servlet-name>
   	<url-pattern>/balance</url-pattern>
@@ -24,5 +28,9 @@
   <servlet-mapping>
   	<servlet-name>Breakdown</servlet-name>
   	<url-pattern>/breakdown</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>SignUp</servlet-name>
+  	<url-pattern>/signUp</url-pattern>
   </servlet-mapping>
 </web-app>
