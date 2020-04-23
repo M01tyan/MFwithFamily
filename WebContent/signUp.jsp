@@ -8,6 +8,8 @@
 </head>
 <body>
 	<h1>サインアップ</h1>
+	<% String message = (String)request.getAttribute("message"); %>
+	<span style="color: red"><%= message == null ? "" : message %></span>
 	<form name="signUpForm" action="signUp" method="post">
 		<p>メールアドレス<input type="text" name="email"></p>
 		<p>パスワード<input type="text" name="password"></p>

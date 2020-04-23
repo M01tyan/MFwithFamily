@@ -21,7 +21,6 @@ import model.Analytics;
  */
 public class BreakdownController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -60,9 +59,9 @@ public class BreakdownController extends HttpServlet {
 	private ArrayList<Analytics> fetchAllBreakdown() throws ClassNotFoundException, SQLException {
 		ArrayList<Analytics> list = new ArrayList<Analytics>();
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:mysql://localhost:3306/MFwithFamily";
-		String user = "root";
-		String password = "m@1tyanRunner";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
 		Connection conn = DriverManager.getConnection(url, user, password);
 		try {
 			PreparedStatement ps =
@@ -111,10 +110,9 @@ public class BreakdownController extends HttpServlet {
 
 	private ArrayList<Analytics> fetchEachBreakdown(int id) throws ClassNotFoundException, SQLException {
 		ArrayList<Analytics> list = new ArrayList<Analytics>();
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:mysql://localhost:3306/MFwithFamily";
-		String user = "root";
-		String password = "m@1tyanRunner";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
 		Connection conn = DriverManager.getConnection(url, user, password);
 		try {
 			PreparedStatement ps =

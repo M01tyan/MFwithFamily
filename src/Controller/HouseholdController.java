@@ -22,7 +22,6 @@ import model.Household;
 //@WebServlet("/List")
 public class HouseholdController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -56,9 +55,9 @@ public class HouseholdController extends HttpServlet {
 	private ArrayList<Household> fetchAllHousehold() throws ClassNotFoundException, SQLException {
 		ArrayList<Household> list = new ArrayList<Household>();
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:mysql://localhost:3306/MFwithFamily";
-		String user = "root";
-		String password = "m@1tyanRunner";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
 		Connection conn = DriverManager.getConnection(url, user, password);
 		try {
 			PreparedStatement ps =
@@ -123,9 +122,9 @@ public class HouseholdController extends HttpServlet {
 	private ArrayList<Household> fetchEachHousehold(int id) throws ClassNotFoundException, SQLException {
 		ArrayList<Household> list = new ArrayList<Household>();
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:mysql://localhost:3306/MFwithFamily";
-		String user = "root";
-		String password = "m@1tyanRunner";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
 		Connection conn = DriverManager.getConnection(url, user, password);
 		try {
 			PreparedStatement ps =

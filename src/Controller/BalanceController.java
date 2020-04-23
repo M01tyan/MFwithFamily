@@ -7,7 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -20,11 +19,6 @@ import model.Balance;
  */
 public class BalanceController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private ServletContext context;
-
-	public void init() throws ServletException {
-        context = getServletContext();
-    }
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -56,15 +50,15 @@ public class BalanceController extends HttpServlet {
 		balance = fetchEachBalance(balance);
 		HttpSession session = request.getSession();
 		session.setAttribute("balance", balance);
-		context.getRequestDispatcher("/balance.jsp")
+		request.getRequestDispatcher("/balance.jsp")
 				.forward(request, response);
 	}
 
 	private Balance fetchTotalBalance(Balance balance) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:mysql://localhost:3306/MFwithFamily";
-		String user = "root";
-		String password = "m@1tyanRunner";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
 		Connection conn = DriverManager.getConnection(url, user, password);
 		try {
 			PreparedStatement ps =
@@ -103,9 +97,9 @@ public class BalanceController extends HttpServlet {
 
 	private Balance fetchEachBalance(Balance balance) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:mysql://localhost:3306/MFwithFamily";
-		String user = "root";
-		String password = "m@1tyanRunner";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
 		Connection conn = DriverManager.getConnection(url, user, password);
 		try {
 			PreparedStatement ps =
