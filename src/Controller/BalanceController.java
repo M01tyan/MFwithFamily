@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,10 +17,6 @@ import model.Balance;
 /**
  * Servlet implementation class Balance
  */
-@WebServlet(
-	name="Balance",
-	urlPatterns= {"/balance"}
-)
 public class BalanceController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	/**
@@ -64,7 +59,6 @@ public class BalanceController extends HttpServlet {
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
-		System.out.println(url);
 		Connection conn = DriverManager.getConnection(url, user, password);
 		try {
 			PreparedStatement ps =

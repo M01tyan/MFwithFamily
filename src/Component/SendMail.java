@@ -12,11 +12,17 @@ import com.sendgrid.helpers.mail.objects.Email;
 
 public class SendMail {
 
-	public void send(String email) throws IOException {
+	public String send(String email) throws IOException {
+		String code = createAuthCode();
 		Email from = new Email("maeda.kanta@moneyforward.co.jp");
-	    String mailSubject = "Sending with Twilio SendGrid is Fun";
+	    String mailSubject = "Authentication Email";
 	    Email to = new Email(email);
-	    Content mailContent = new Content("text/plain", "and easy to do anywhere, even with Java");
+	    Content mailContent = new Content("text/plain",
+	    		"認証コードをお送りします。\n\n"
+	    		+ code + "\n\n"
+	    		+ "アプリの方で認証コードを入力し、\n"
+	    		+ "アカウントを有効にしてください。"
+	    		+ "なお30分以内に認証しない場合は失効します");
 	    Mail mail = new Mail(from, mailSubject, to, mailContent);
 	    String sendGridAPI = System.getenv("SENDGRID_API_KEY");
 
@@ -33,5 +39,15 @@ public class SendMail {
 	    } catch (IOException ex) {
 	      throw ex;
 	    }
+	    return code;
+	}
+
+	private String createAuthCode() {
+		int FINAL_NUMBER = 4;
+		String code = "";
+		for (int i=0; i<FINAL_NUMBER; i++) {
+			code += (int)(Math.random() * 9) + 1;
+		}
+		return code;
 	}
 }
