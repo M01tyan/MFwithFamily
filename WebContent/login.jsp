@@ -7,6 +7,11 @@
 <title>Insert title here</title>
 </head>
 <body>
-
+	<h1>Money Forward with Family</h1>
+	<h2>ログイン</h2>
+	<form action="Login">
+		<p>メールアドレス<input type="text" name="email"></p>
+		<p>パスワード<input type="text" name="password"></p>
+	</form>
 </body>
 </html>
