@@ -64,6 +64,7 @@ public class BalanceController extends HttpServlet {
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
+		System.out.println(url);
 		Connection conn = DriverManager.getConnection(url, user, password);
 		try {
 			PreparedStatement ps =
