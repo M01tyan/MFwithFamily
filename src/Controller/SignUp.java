@@ -42,6 +42,8 @@ public class SignUp extends HttpServlet {
 		if (message.isEmpty()) {
 			SendMail sendMail = new SendMail();
 			String code = sendMail.send(email);
+			session.setAttribute("email", email);
+			session.setAttribute("password", password);
 			session.setAttribute("code", code);
 			request.getRequestDispatcher("/auth.jsp").forward(request, response);
 		} else {
