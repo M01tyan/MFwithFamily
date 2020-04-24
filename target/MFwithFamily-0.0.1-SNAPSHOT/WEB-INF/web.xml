@@ -33,16 +33,4 @@
   	<servlet-name>SignUp</servlet-name>
   	<url-pattern>/signUp</url-pattern>
   </servlet-mapping>
-  <context-param>
-  	<param-name>db_url</param-name>
-  	<param-value>jdbc:mysql://b3431fdd6c6422:5484b082@us-cdbr-iron-east-01.cleardb.net/heroku_ef3b6c8a0bd85cb?reconnect=true</param-value>
-  </context-param>
-  <context-param>
-  	<param-name>db_user</param-name>
-  	<param-value>b3431fdd6c6422</param-value>
-  </context-param>
-  <context-param>
-  	<param-name>db_password</param-name>
-  	<param-value>5484b082</param-value>
-  </context-param>
 </web-app>
