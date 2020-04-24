@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -56,7 +55,7 @@ public class HouseholdController extends HttpServlet {
 	private ArrayList<Household> fetchAllHousehold() throws ClassNotFoundException, SQLException {
 		ArrayList<Household> list = new ArrayList<Household>();
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		Connection conn = DriverManager.getConnection(url, user, password);

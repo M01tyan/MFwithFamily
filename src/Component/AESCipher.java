@@ -35,7 +35,6 @@ public class AESCipher {
     }
 
 	public String decrypto(byte[] cryptoText, SecretKey key, IvParameterSpec iv) throws GeneralSecurityException {
-        // 書式:"アルゴリズム/ブロックモード/パディング方式"
         Cipher decrypter = Cipher.getInstance("AES/CBC/PKCS5Padding");
         decrypter.init(Cipher.DECRYPT_MODE, key, iv);
 

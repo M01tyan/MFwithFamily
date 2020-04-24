@@ -56,7 +56,7 @@ public class BalanceController extends HttpServlet {
 
 	private Balance fetchTotalBalance(Balance balance) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		Connection conn = DriverManager.getConnection(url, user, password);

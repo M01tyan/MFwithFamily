@@ -1,7 +1,11 @@
 package Controller;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import javax.crypto.SecretKey;
@@ -53,10 +57,15 @@ public class Authentication extends HttpServlet {
 		String message = "";
 //		if (code.equals(inputCode)) {
 			System.out.println("Authentication Success!!");
+			AESCipher cipher = new AESCipher();
+			SecretKey secretKey = cipher.decodeSecretKey(System.getenv("SECRET_KEY"));
+			IvParameterSpec iv = cipher.decodeIvParameter(System.getenv("IV_PARAMETER"));
 			try {
-				createUser(email, password);
+				byte[] encryptEmail = cipher.encrypto(email, secretKey, iv);
+				byte[] encryptPassword = cipher.encrypto(password, secretKey, iv);
+				createUser(encryptEmail, encryptPassword);
+				System.out.println("SQL NOT ERROR");
 			} catch (ClassNotFoundException | SQLException | GeneralSecurityException e) {
-				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
 			}
 //			response.sendRedirect("/MFwithFamily/balance");
@@ -67,53 +76,42 @@ public class Authentication extends HttpServlet {
 //		}
 	}
 
-	private void createUser(String email, String password) throws SQLException, ClassNotFoundException, GeneralSecurityException {
+	private void createUser(byte[] email, byte[] password) throws SQLException, ClassNotFoundException {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String DBUser = System.getenv("HEROKU_DB_USER");
+		String DBPassword = System.getenv("HEROKU_DB_PASSWORD");
+
+		Connection conn = DriverManager.getConnection(url, DBUser, DBPassword);
 		try {
-			AESCipher cipher = new AESCipher();
-			SecretKey secretKey = cipher.decodeSecretKey(System.getenv("SECRET_KEY"));
-			IvParameterSpec iv = cipher.decodeIvParameter(System.getenv("IV_PARAMETER"));
-			byte[] encryptEmail = cipher.encrypto(email, secretKey, iv);
-			byte[] encryptPassword = cipher.encrypto(password, secretKey, iv);
-			String decryptEmail = cipher.decrypto(encryptEmail, secretKey, iv);
-			String decryptPassword = cipher.decrypto(encryptPassword, secretKey, iv);
-		} catch(GeneralSecurityException e) {
-			System.out.println(e);
+			PreparedStatement ps =
+					conn.prepareStatement("INSERT INTO users "
+							+ "(`email`, `password`) "
+							+ "VALUES (?, ?);");
+			try {
+				ps.setBinaryStream(1, new ByteArrayInputStream(email), email.length);
+				ps.setBinaryStream(2, new ByteArrayInputStream(password), password.length);
+				int nums = ps.executeUpdate();
+				System.out.println(nums);
+			} catch (SQLException e) {
+				System.out.println("SQL ERROR: " + e);
+			} finally {
+				if (ps != null) {
+					try {
+						ps.close();
+					} catch (SQLException e) {
+						System.out.println("PreparedStatementのクローズに失敗しました。");
+					}
+				}
+			}
+		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					System.out.println("MySQLのクローズに失敗しました。");
+				}
+			}
 		}
-//
-//		Class.forName("com.mysql.cj.jdbc.Driver");
-//		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?verifyServerCertificate=false&useSSL=true";
-//		String user = System.getenv("HEROKU_DB_USER");
-//		String password = System.getenv("HEROKU_DB_PASSWORD");
-//		Connection conn = DriverManager.getConnection(url, user, password);
-//		try {
-//			PreparedStatement ps =
-//					conn.prepareStatement("INSERT INO");
-//			try {
-//				ResultSet rs = ps.executeQuery();
-//				if (rs.next()) {
-//
-//				} else {
-//
-//				}
-//			} catch (SQLException e) {
-//				System.out.println("SQL ERROR: " + e);
-//			} finally {
-//				if (ps != null) {
-//					try {
-//						ps.close();
-//					} catch (SQLException e) {
-//						System.out.println("PreparedStatementのクローズに失敗しました。");
-//					}
-//				}
-//			}
-//		} finally {
-//			if (conn != null) {
-//				try {
-//					conn.close();
-//				} catch (SQLException e) {
-//					System.out.println("MySQLのクローズに失敗しました。");
-//				}
-//			}
-//		}
 	}
 }

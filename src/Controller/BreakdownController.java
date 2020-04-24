@@ -59,7 +59,7 @@ public class BreakdownController extends HttpServlet {
 	private ArrayList<Analytics> fetchAllBreakdown() throws ClassNotFoundException, SQLException {
 		ArrayList<Analytics> list = new ArrayList<Analytics>();
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		Connection conn = DriverManager.getConnection(url, user, password);
