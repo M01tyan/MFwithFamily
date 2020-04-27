@@ -45,7 +45,8 @@ public class SignUp extends HttpServlet {
 			session.setAttribute("email", email);
 			session.setAttribute("password", password);
 			session.setAttribute("code", code);
-			request.getRequestDispatcher("/auth.jsp").forward(request, response);
+			System.out.println(code);
+			response.sendRedirect("/MFwithFamily/auth");
 		} else {
 			request.setAttribute("message", message);
 			request.getRequestDispatcher("/signUp.jsp").forward(request, response);
