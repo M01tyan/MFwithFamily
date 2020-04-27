@@ -48,7 +48,7 @@ public class HouseholdController extends HttpServlet {
 		HttpSession session = request.getSession();
 		session.setAttribute("id", id);
 		session.setAttribute("householdList", householdList);
-		request.getRequestDispatcher("/household.jsp")
+		request.getRequestDispatcher(request.getContextPath()+"/household.jsp")
 			.forward(request, response);
 	}
 

@@ -11,9 +11,9 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<a href="/MFwithFamily/balance">戻る</a>
+	<a href="${pageContext.request.contextPath}/balance">戻る</a>
 	<h1>家計簿</h1>
-	<a href="/MFwithFamily/breakdown">収支内訳</a>
+	<a href="${pageContext.request.contextPath}/breakdown">収支内訳</a>
 	<div style="display: flex; flex-direction: column">
 
 	<% ArrayList<Household> householdList = (ArrayList<Household>)session.getAttribute("householdList"); %>

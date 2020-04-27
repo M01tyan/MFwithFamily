@@ -89,7 +89,7 @@ input[type="submit"]:hover {
 		<div class="button_wrapper"><input class="button" type="submit" value="LOGIN"></div>
 	</form>
 
-	<a href="/MFwithFamily/signUp" class="new-accunt">新規登録</a>
+	<a href="${pageContext.request.contextPath}/signUp" class="new-accunt">新規登録</a>
 </div>
 </body>
 </html>

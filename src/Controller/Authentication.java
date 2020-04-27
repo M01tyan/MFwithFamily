@@ -31,7 +31,7 @@ public class Authentication extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.getRequestDispatcher("/auth.jsp")
+		request.getRequestDispatcher(request.getContextPath()+"/auth.jsp")
 			.forward(request, response);
 	}
 
@@ -55,8 +55,7 @@ public class Authentication extends HttpServlet {
 				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
 			}
-			System.out.println("SQL NOT ERROR");
-			response.sendRedirect("/MFwithFamily/balance");
+			response.sendRedirect(request.getContextPath()+"/balance");
 		} else {
 			message += "認証コードが違います";
 			request.setAttribute("message", message);

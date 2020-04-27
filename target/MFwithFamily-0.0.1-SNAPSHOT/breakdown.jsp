@@ -14,9 +14,9 @@
 	ArrayList<Analytics> analyticsList = (ArrayList<Analytics>)session.getAttribute("analyticsList");
 	int id = (int)session.getAttribute("id");
 	%>
-	<a href="/MFwithFamily/balance">戻る</a>
+	<a href="${pageContext.request.contextPath}/balance">戻る</a>
 	<h1>収支内訳</h1>
-	<a href="/MFwithFamily/household?id=<%= id %>">家計簿</a><BR>
+	<a href="${pageContext.request.contextPath}/household?id=<%= id %>">家計簿</a><BR>
 	<h4>支出</h4>
 	<table border="1">
 	<%

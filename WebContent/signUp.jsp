@@ -76,7 +76,7 @@ input[type="submit"]:hover {
 	<h1>サインアップ</h1>
 	<% String message = (String)request.getAttribute("message"); %>
 	<span style="color: red"><%= message == null ? "" : message %></span>
-	<a href="/MFwithFamily">&lt; 戻る</a>
+	<a href="${pageContext.request.contextPath}/">&lt; 戻る</a>
 	<form name="signUpForm" action="signUp" method="post">
 		<div class="cp_iptxt">
 			<input type="text" placeholder="メールアドレス" name="email">

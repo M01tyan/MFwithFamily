@@ -46,10 +46,10 @@ public class SignUp extends HttpServlet {
 			session.setAttribute("password", password);
 			session.setAttribute("code", code);
 			System.out.println(code);
-			response.sendRedirect("/MFwithFamily/auth");
+			response.sendRedirect(request.getContextPath()+"/auth");
 		} else {
 			request.setAttribute("message", message);
-			request.getRequestDispatcher("/signUp.jsp").forward(request, response);
+			request.getRequestDispatcher(request.getContextPath()+"/signUp.jsp").forward(request, response);
 		}
 	}
 
