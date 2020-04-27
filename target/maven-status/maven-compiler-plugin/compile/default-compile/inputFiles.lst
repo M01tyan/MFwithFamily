@@ -1,11 +1,14 @@
-/Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/Controller/SignUp.java
 /Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/model/Analytics.java
+/Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/model/Balance.java
+/Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/Controller/HouseholdController.java
+/Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/Component/AESCipher.java
+/Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/Controller/Login.java
+/Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/Controller/SignUp.java
 /Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/Controller/BreakdownController.java
+/Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/Controller/Authentication.java
 /Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/model/Relationship.java
 /Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/Controller/BalanceController.java
 /Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/model/User.java
-/Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/model/Balance.java
-/Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/Controller/HouseholdController.java
 /Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/model/Family.java
 /Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/Component/SendMail.java
 /Applications/Eclipse_2020-03.app/Contents/workspace/MFwithFamily/src/model/Household.java

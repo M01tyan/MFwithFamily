@@ -12,8 +12,9 @@
 	<span style="color: red"><%= message == null ? "" : message %></span>
 	<form name="signUpForm" action="signUp" method="post">
 		<p>メールアドレス<input type="text" name="email"></p>
-		<p>パスワード<input type="text" name="password"></p>
-		<p>確認用パスワード<input type="text" name="confirmation"></p>
+		<p>パスワードは6文字以上20文字以下の半角英数字で入力してください</p>
+		<p>パスワード<input type="password" name="password"></p>
+		<p>確認用パスワード<input type="password" name="confirmation"></p>
 		<p><input type="submit" value="submit"></p>
 	</form>
 </body>

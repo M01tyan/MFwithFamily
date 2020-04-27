@@ -2,10 +2,13 @@ model/Analytics.class
 model/Relationship.class
 model/Family.class
 Component/SendMail.class
+Controller/Authentication.class
 Controller/BreakdownController.class
 Controller/HouseholdController.class
+Controller/SignUp.class
+Controller/Login.class
 model/User.class
 Controller/BalanceController.class
 model/Balance.class
 model/Household.class
-Controller/SignUp.class
+Component/AESCipher.class
