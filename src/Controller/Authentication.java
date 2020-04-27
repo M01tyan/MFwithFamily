@@ -39,7 +39,6 @@ public class Authentication extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		response.setContentType("text/html; charset=UTF-8");
 		HttpSession session = request.getSession();
 		String inputCode = (String)request.getParameter("authCode");
@@ -52,7 +51,6 @@ public class Authentication extends HttpServlet {
 			try {
 				createUser(email, password);
 			} catch (ClassNotFoundException | SQLException e) {
-				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
 			}
 			response.sendRedirect(request.getContextPath()+"/balance");
@@ -64,6 +62,7 @@ public class Authentication extends HttpServlet {
 	}
 
 	private void createUser(String email, String password) throws SQLException, ClassNotFoundException {
+		System.out.println(email + " : " + password);
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String DBUser = System.getenv("HEROKU_DB_USER");
@@ -74,8 +73,9 @@ public class Authentication extends HttpServlet {
 			PreparedStatement ps =
 					conn.prepareStatement("INSERT INTO users "
 							+ "(`email`, `password`) "
-							+ "VALUES (AES_ENCRYPT(?, ?), AES_ENCRYPT(?, ?));");
+							+ "VALUES (HEX(AES_ENCRYPT(?, ?)), HEX(AES_ENCRYPT(?, ?)));");
 		) {
+			System.out.println(secretKey);
 			ps.setString(1, email);
 			ps.setString(2, secretKey);
 			ps.setString(3, password);
