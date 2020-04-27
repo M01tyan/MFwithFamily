@@ -47,7 +47,7 @@ public class BalanceController extends HttpServlet {
 	private void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ClassNotFoundException, SQLException {
 		Balance balance = new Balance();
 		balance = fetchTotalBalance(balance);
-		balance = fetchEachBalance(balance);
+//		balance = fetchEachBalance(balance);
 		HttpSession session = request.getSession();
 		session.setAttribute("balance", balance);
 		request.getRequestDispatcher("/balance.jsp")
@@ -68,7 +68,9 @@ public class BalanceController extends HttpServlet {
 			try {
 				ResultSet rs = ps.executeQuery();
 				if (rs.next()) {
-					balance.setTotalBalance(rs.getInt("total"));
+					int total = rs.getInt("total");
+					System.out.println(total);
+					balance.setTotalBalance(total);
 				} else {
 					return balance;
 				}
