@@ -22,7 +22,7 @@ public class Login extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.getRequestDispatcher("/login.jsp")
+		request.getRequestDispatcher(request.getContextPath()+"/login.jsp")
 			.forward(request, response);
 	}
 
@@ -44,11 +44,11 @@ public class Login extends HttpServlet {
 			e.printStackTrace();
 		}
 		if (loginSuccess) {
-			response.sendRedirect("/MFwithFamily/balance");
+			response.sendRedirect(request.getContextPath()+"/balance");
 		} else {
 			message += "ログインできませんでした";
 			request.setAttribute("message", message);
-			request.getRequestDispatcher("/login.jsp").forward(request, response);
+			request.getRequestDispatcher(request.getContextPath()+"/login.jsp").forward(request, response);
 		}
 	}
 
@@ -61,7 +61,12 @@ public class Login extends HttpServlet {
 		try (
 			Connection conn = DriverManager.getConnection(url, DBuser, DBpassword);
 			PreparedStatement ps =
-			conn.prepareStatement("SELECT id, AES_DECRYPT(`email`, ?) AS email, AES_DECRYPT(`password`, ?) AS password FROM users WHERE email=AES_ENCRYPT(?, ?) AND password=AES_ENCRYPT(?, ?);");
+			conn.prepareStatement("SELECT "
+					+ "id, "
+					+ "CONVERT(AES_DECRYPT(email, ?) USING utf8) AS email, "
+					+ "CONVERT(AES_DECRYPT(password, ?) USING utf8) AS password "
+					+ "FROM users "
+					+ "WHERE email=HEX(AES_ENCRYPT(?, ?)) AND password=HEX(AES_ENCRYPT(?, ?));");
 		) {
 			ps.setString(1, secretKey);
 			ps.setString(2, secretKey);

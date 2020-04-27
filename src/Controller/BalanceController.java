@@ -50,7 +50,7 @@ public class BalanceController extends HttpServlet {
 //		balance = fetchEachBalance(balance);
 		HttpSession session = request.getSession();
 		session.setAttribute("balance", balance);
-		request.getRequestDispatcher("/balance.jsp")
+		request.getRequestDispatcher(request.getContextPath()+"/balance.jsp")
 				.forward(request, response);
 	}
 

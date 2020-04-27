@@ -52,7 +52,7 @@ public class BreakdownController extends HttpServlet {
 		int id = (int)session.getAttribute("id");
 		ArrayList<Analytics> analyticsList = id == 0 ? fetchAllBreakdown() : fetchEachBreakdown(id);
 		session.setAttribute("analyticsList", analyticsList);
-		request.getRequestDispatcher("/breakdown.jsp")
+		request.getRequestDispatcher(request.getContextPath()+"/breakdown.jsp")
 			.forward(request, response);
 	}
 
