@@ -58,8 +58,8 @@ public class HouseholdController extends HttpServlet {
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
-		Connection conn = DriverManager.getConnection(url, user, password);
-		try {
+		try (
+			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
 			conn.prepareStatement("SELECT "
 					+ "target, "
@@ -76,45 +76,27 @@ public class HouseholdController extends HttpServlet {
 					+ "relationship.name AS relationship_name "
 					+ "from household "
 					+ "INNER JOIN users ON users.id = household.user_id "
-					+ "INNER JOIN relationship ON users.relationship_id = relationship.id;"
-			);
-			try {
-				ResultSet rs = ps.executeQuery();
-				while (rs.next()) {
-					Household household = new Household();
-					household.setTarget(rs.getInt("target"));
-					household.setDate(rs.getString("date"));
-					household.setContent(rs.getString("content"));
-					household.setPrice(rs.getInt("price"));
-					household.setFinancial(rs.getString("financial"));
-					household.setLargeItem(rs.getString("large_item"));
-					household.setMiddleItem(rs.getString("middle_item"));
-					household.setMemo(rs.getString("memo"));
-					household.setTransfer(rs.getInt("transfer"));
-					household.setId(rs.getString("id"));
-					household.setUserName(rs.getString("user_name"));
-					household.setRelationshipName(rs.getString("relationship_name"));
-					list.add(household);
-				}
-			} catch (SQLException e) {
-				System.out.println("SQL ERROR: " + e);
-			} finally {
-				if (ps != null) {
-					try {
-						ps.close();
-					} catch (SQLException e) {
-						System.out.println("PreparedStatementのクローズに失敗しました。");
-					}
-				}
+					+ "INNER JOIN relationship ON users.relationship_id = relationship.id;");
+		) {
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Household household = new Household();
+				household.setTarget(rs.getInt("target"));
+				household.setDate(rs.getString("date"));
+				household.setContent(rs.getString("content"));
+				household.setPrice(rs.getInt("price"));
+				household.setFinancial(rs.getString("financial"));
+				household.setLargeItem(rs.getString("large_item"));
+				household.setMiddleItem(rs.getString("middle_item"));
+				household.setMemo(rs.getString("memo"));
+				household.setTransfer(rs.getInt("transfer"));
+				household.setId(rs.getString("id"));
+				household.setUserName(rs.getString("user_name"));
+				household.setRelationshipName(rs.getString("relationship_name"));
+				list.add(household);
 			}
-		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					System.out.println("MySQLのクローズに失敗しました。");
-				}
-			}
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
 		}
 		return list;
 	}
@@ -125,8 +107,8 @@ public class HouseholdController extends HttpServlet {
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
-		Connection conn = DriverManager.getConnection(url, user, password);
-		try {
+		try (
+			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
 			conn.prepareStatement("SELECT "
 					+ "target, "
@@ -144,45 +126,27 @@ public class HouseholdController extends HttpServlet {
 					+ "from household "
 					+ "INNER JOIN users ON users.id = household.user_id "
 					+ "INNER JOIN relationship ON users.relationship_id = relationship.id "
-					+ "WHERE users.id = " + id + ";"
-			);
-			try {
-				ResultSet rs = ps.executeQuery();
-				while (rs.next()) {
-					Household household = new Household();
-					household.setTarget(rs.getInt("target"));
-					household.setDate(rs.getString("date"));
-					household.setContent(rs.getString("content"));
-					household.setPrice(rs.getInt("price"));
-					household.setFinancial(rs.getString("financial"));
-					household.setLargeItem(rs.getString("large_item"));
-					household.setMiddleItem(rs.getString("middle_item"));
-					household.setMemo(rs.getString("memo"));
-					household.setTransfer(rs.getInt("transfer"));
-					household.setId(rs.getString("id"));
-					household.setUserName(rs.getString("user_name"));
-					household.setRelationshipName(rs.getString("relationship_name"));
-					list.add(household);
-				}
-			} catch (SQLException e) {
-				System.out.println("SQL ERROR: " + e);
-			} finally {
-				if (ps != null) {
-					try {
-						ps.close();
-					} catch (SQLException e) {
-						System.out.println("PreparedStatementのクローズに失敗しました。");
-					}
-				}
+					+ "WHERE users.id = " + id + ";");
+		) {
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Household household = new Household();
+				household.setTarget(rs.getInt("target"));
+				household.setDate(rs.getString("date"));
+				household.setContent(rs.getString("content"));
+				household.setPrice(rs.getInt("price"));
+				household.setFinancial(rs.getString("financial"));
+				household.setLargeItem(rs.getString("large_item"));
+				household.setMiddleItem(rs.getString("middle_item"));
+				household.setMemo(rs.getString("memo"));
+				household.setTransfer(rs.getInt("transfer"));
+				household.setId(rs.getString("id"));
+				household.setUserName(rs.getString("user_name"));
+				household.setRelationshipName(rs.getString("relationship_name"));
+				list.add(household);
 			}
-		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					System.out.println("MySQLのクローズに失敗しました。");
-				}
-			}
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
 		}
 		return list;
 	}

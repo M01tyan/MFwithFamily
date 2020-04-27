@@ -62,8 +62,8 @@ public class BreakdownController extends HttpServlet {
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
-		Connection conn = DriverManager.getConnection(url, user, password);
-		try {
+		try (
+			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
 			conn.prepareStatement("(SELECT SUM(price) AS price, large_item, \"合計\" AS payer "
 					+ "FROM household INNER JOIN users ON users.id = household.user_id "
@@ -74,36 +74,18 @@ public class BreakdownController extends HttpServlet {
 					+ "INNER JOIN users ON users.id = household.user_id "
 					+ "INNER JOIN relationship ON users.relationship_id = relationship.id "
 					+ "GROUP BY large_item, users.id HAVING price < 0) "
-					+ "ORDER BY large_item DESC, price ASC"
-			);
-			try {
-				ResultSet rs = ps.executeQuery();
-				while (rs.next()) {
-					Analytics analytics = new Analytics();
-					analytics.setLargeItem(rs.getString("large_item"));
-					analytics.setPrice(rs.getInt("price"));
-					analytics.setPayer(rs.getString("payer"));
-					list.add(analytics);
-				}
-			} catch (SQLException e) {
-				System.out.println("SQL ERROR: " + e);
-			} finally {
-				if (ps != null) {
-					try {
-						ps.close();
-					} catch (SQLException e) {
-						System.out.println("PreparedStatementのクローズに失敗しました。");
-					}
-				}
+					+ "ORDER BY large_item DESC, price ASC");
+		) {
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Analytics analytics = new Analytics();
+				analytics.setLargeItem(rs.getString("large_item"));
+				analytics.setPrice(rs.getInt("price"));
+				analytics.setPayer(rs.getString("payer"));
+				list.add(analytics);
 			}
-		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					System.out.println("MySQLのクローズに失敗しました。");
-				}
-			}
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
 		}
 		return list;
 	}
@@ -113,44 +95,26 @@ public class BreakdownController extends HttpServlet {
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
-		Connection conn = DriverManager.getConnection(url, user, password);
-		try {
+		try (
+			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
 			conn.prepareStatement("SELECT SUM(price) AS price, large_item, users.name AS payer FROM household "
 					+ "INNER JOIN users ON users.id = household.user_id "
 					+ "INNER JOIN relationship ON users.relationship_id = relationship.id "
 					+ "WHERE users.id = " + id + " "
 					+ "GROUP BY large_item, users.id HAVING price < 0 "
-					+ "ORDER BY large_item DESC, price ASC"
-			);
-			try {
-				ResultSet rs = ps.executeQuery();
-				while (rs.next()) {
-					Analytics analytics = new Analytics();
-					analytics.setLargeItem(rs.getString("large_item"));
-					analytics.setPrice(rs.getInt("price"));
-					analytics.setPayer(rs.getString("payer"));
-					list.add(analytics);
-				}
-			} catch (SQLException e) {
-				System.out.println("SQL ERROR: " + e);
-			} finally {
-				if (ps != null) {
-					try {
-						ps.close();
-					} catch (SQLException e) {
-						System.out.println("PreparedStatementのクローズに失敗しました。");
-					}
-				}
+					+ "ORDER BY large_item DESC, price ASC");
+		) {
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Analytics analytics = new Analytics();
+				analytics.setLargeItem(rs.getString("large_item"));
+				analytics.setPrice(rs.getInt("price"));
+				analytics.setPayer(rs.getString("payer"));
+				list.add(analytics);
 			}
-		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					System.out.println("MySQLのクローズに失敗しました。");
-				}
-			}
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
 		}
 		return list;
 	}

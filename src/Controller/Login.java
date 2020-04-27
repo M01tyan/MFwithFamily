@@ -57,44 +57,27 @@ public class Login extends HttpServlet {
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String DBuser = System.getenv("HEROKU_DB_USER");
 		String DBpassword = System.getenv("HEROKU_DB_PASSWORD");
-		Connection conn = DriverManager.getConnection(url, DBuser, DBpassword);
 		String secretKey = System.getenv("SECRET_KEY");
-		try {
+		try (
+			Connection conn = DriverManager.getConnection(url, DBuser, DBpassword);
 			PreparedStatement ps =
 			conn.prepareStatement("SELECT id, AES_DECRYPT(`email`, ?) AS email, AES_DECRYPT(`password`, ?) AS password FROM users WHERE email=AES_ENCRYPT(?, ?) AND password=AES_ENCRYPT(?, ?);");
+		) {
 			ps.setString(1, secretKey);
 			ps.setString(2, secretKey);
 			ps.setString(3, email);
 			ps.setString(4, secretKey);
 			ps.setString(5, password);
 			ps.setString(6, secretKey);
-			try {
-				ResultSet rs = ps.executeQuery();
-				if (rs.next()) {
-					int id = rs.getInt("id");
-					return true;
-				} else {
-					System.out.println("NOT USER");
-				}
-			} catch (SQLException e) {
-				System.out.println("SQL ERROR: " + e);
-			} finally {
-				if (ps != null) {
-					try {
-						ps.close();
-					} catch (SQLException e) {
-						System.out.println("PreparedStatementのクローズに失敗しました。");
-					}
-				}
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				int id = rs.getInt("id");
+				return true;
+			} else {
+				System.out.println("NOT USER");
 			}
-		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					System.out.println("MySQLのクローズに失敗しました。");
-				}
-			}
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
 		}
 		return false;
 	}

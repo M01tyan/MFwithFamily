@@ -70,38 +70,21 @@ public class Authentication extends HttpServlet {
 		String DBUser = System.getenv("HEROKU_DB_USER");
 		String DBPassword = System.getenv("HEROKU_DB_PASSWORD");
 		String secretKey = System.getenv("SECRET_KEY");
-		Connection conn = DriverManager.getConnection(url, DBUser, DBPassword);
-		try {
+		try (
+			Connection conn = DriverManager.getConnection(url, DBUser, DBPassword);
 			PreparedStatement ps =
 					conn.prepareStatement("INSERT INTO users "
 							+ "(`email`, `password`) "
 							+ "VALUES (AES_ENCRYPT(?, ?), AES_ENCRYPT(?, ?));");
-			try {
-				ps.setString(1, email);
-				ps.setString(2, secretKey);
-				ps.setString(3, password);
-				ps.setString(4, secretKey);
-				int nums = ps.executeUpdate();
-				System.out.println(nums);
-			} catch (SQLException e) {
-				System.out.println("SQL ERROR: " + e);
-			} finally {
-				if (ps != null) {
-					try {
-						ps.close();
-					} catch (SQLException e) {
-						System.out.println("PreparedStatementのクローズに失敗しました。");
-					}
-				}
-			}
-		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					System.out.println("MySQLのクローズに失敗しました。");
-				}
-			}
+		) {
+			ps.setString(1, email);
+			ps.setString(2, secretKey);
+			ps.setString(3, password);
+			ps.setString(4, secretKey);
+			int nums = ps.executeUpdate();
+			System.out.println(nums);
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
 		}
 	}
 }
