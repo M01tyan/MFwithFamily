@@ -1,16 +1,25 @@
 package model;
 
 public class User {
-	private int id;
+	private int uid;
 	private String name;
 	private int relationshipId;
 	private int familyId;
+	private boolean emailCertificate;
+
+	public User(int uid, String name, int relationshipId, int familyId, boolean emailCertificate) {
+		this.uid = uid;
+		this.name = name;
+		this.relationshipId = relationshipId;
+		this.familyId = familyId;
+		this.emailCertificate = emailCertificate;
+	}
 
 	public void setId(int id) {
-		this.id = id;
+		this.uid = id;
 	}
 	public int getId() {
-		return this.id;
+		return this.uid;
 	}
 
 	public void setName(String name) {
@@ -32,5 +41,12 @@ public class User {
 	}
 	public int getFamilyId() {
 		return this.familyId;
+	}
+
+	public void setEmailCertificate(boolean emailCertificate) {
+		this.emailCertificate = emailCertificate;
+	}
+	public boolean getEmailCertificate() {
+		return this.emailCertificate;
 	}
 }

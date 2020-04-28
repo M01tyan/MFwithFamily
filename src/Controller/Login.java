@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -35,15 +36,16 @@ public class Login extends HttpServlet {
 		String message = "";
 		String email = (String)request.getParameter("email");
 		String password = (String)request.getParameter("password");
-		boolean loginSuccess = false;
+		int uid = -1;
 		try {
-			loginSuccess = authentication(email, password);
-
+			uid = authentication(email, password);
 		} catch (ClassNotFoundException | SQLException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
-		if (loginSuccess) {
+		if (uid != -1) {
+			ServletContext sc = getServletContext();
+			sc.setAttribute("uid", uid);
 			response.sendRedirect(request.getContextPath()+"/balance");
 		} else {
 			message += "ログインできませんでした";
@@ -52,7 +54,7 @@ public class Login extends HttpServlet {
 		}
 	}
 
-	private boolean authentication(String email, String password) throws ClassNotFoundException, SQLException {
+	private int authentication(String email, String password) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String DBuser = System.getenv("HEROKU_DB_USER");
@@ -77,13 +79,13 @@ public class Login extends HttpServlet {
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
 				int id = rs.getInt("id");
-				return true;
+				return id;
 			} else {
 				System.out.println("NOT USER");
 			}
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);
 		}
-		return false;
+		return -1;
 	}
 }

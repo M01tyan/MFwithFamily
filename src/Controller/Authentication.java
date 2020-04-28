@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -43,17 +44,16 @@ public class Authentication extends HttpServlet {
 		HttpSession session = request.getSession();
 		String inputCode = (String)request.getParameter("authCode");
 		String code = (String)session.getAttribute("code");
-		String email = (String)session.getAttribute("email");
-		String password = (String)session.getAttribute("password");
 		String message = "";
 		if (code.equals(inputCode)) {
 			System.out.println("Authentication Success!!");
 			try {
-				createUser(email, password);
+				updateEmailCertificate();
+				response.sendRedirect(request.getContextPath()+"/balance");
 			} catch (ClassNotFoundException | SQLException e) {
+				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
 			}
-			response.sendRedirect(request.getContextPath()+"/balance");
 		} else {
 			message += "認証コードが違います";
 			request.setAttribute("message", message);
@@ -61,27 +61,20 @@ public class Authentication extends HttpServlet {
 		}
 	}
 
-	private void createUser(String email, String password) throws SQLException, ClassNotFoundException {
-		System.out.println(email + " : " + password);
+	private void updateEmailCertificate() throws SQLException, ClassNotFoundException{
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String DBUser = System.getenv("HEROKU_DB_USER");
 		String DBPassword = System.getenv("HEROKU_DB_PASSWORD");
-		String secretKey = System.getenv("SECRET_KEY");
+		ServletContext sc = getServletContext();
+		int uid = (int)sc.getAttribute("uid");
 		try (
 			Connection conn = DriverManager.getConnection(url, DBUser, DBPassword);
 			PreparedStatement ps =
-					conn.prepareStatement("INSERT INTO users "
-							+ "(`email`, `password`) "
-							+ "VALUES (HEX(AES_ENCRYPT(?, ?)), HEX(AES_ENCRYPT(?, ?)));");
+					conn.prepareStatement("UPDATE users SET email_certificate=true WHERE id = ?;");
 		) {
-			System.out.println(secretKey);
-			ps.setString(1, email);
-			ps.setString(2, secretKey);
-			ps.setString(3, password);
-			ps.setString(4, secretKey);
-			int nums = ps.executeUpdate();
-			System.out.println(nums);
+			ps.setInt(1, uid);
+			ps.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);
 		}

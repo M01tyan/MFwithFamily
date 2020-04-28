@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import model.Balance;
+import model.User;
 /**
  * Servlet implementation class Balance
  */
@@ -46,10 +48,12 @@ public class BalanceController extends HttpServlet {
 
 	private void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ClassNotFoundException, SQLException {
 		Balance balance = new Balance();
+		User user = fetchUserInfo();
 		balance = fetchTotalBalance(balance);
 //		balance = fetchEachBalance(balance);
 		HttpSession session = request.getSession();
 		session.setAttribute("balance", balance);
+		session.setAttribute("user", user);
 		request.getRequestDispatcher(request.getContextPath()+"/balance.jsp")
 				.forward(request, response);
 	}
@@ -64,7 +68,7 @@ public class BalanceController extends HttpServlet {
 			PreparedStatement ps =
 			conn.prepareStatement("SELECT SUM(price) AS total FROM household "
 					+ "INNER JOIN users ON household.user_id = users.id "
-					+ "INNER JOIN relationship ON users.relationship_id = relationship.id;");
+					+ "INNER JOIN family ON users.family_id = family.id;");
 		) {
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
@@ -82,7 +86,7 @@ public class BalanceController extends HttpServlet {
 
 	private Balance fetchEachBalance(Balance balance) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		try (
@@ -104,4 +108,31 @@ public class BalanceController extends HttpServlet {
 		return balance;
 	}
 
+	private User fetchUserInfo() throws ClassNotFoundException, SQLException {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String dbUser = System.getenv("HEROKU_DB_USER");
+		String dbPassword = System.getenv("HEROKU_DB_PASSWORD");
+		ServletContext sc = getServletContext();
+		User user = null;
+		int uid = (int)sc.getAttribute("uid");
+		try (
+			Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
+			PreparedStatement ps = conn.prepareStatement("SELECT * FROM users WHERE id = ?");
+		) {
+			ps.setInt(1, uid);
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				String name = rs.getString("name");
+				int relationshipId = rs.getInt("relationship_id");
+				int familyId = rs.getInt("family_id");
+				boolean emailCertificate = rs.getBoolean("email_certificate");
+				user = new User(uid, name, relationshipId, familyId, emailCertificate);
+			}
+			return user;
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
+		}
+		return user;
+	}
 }
