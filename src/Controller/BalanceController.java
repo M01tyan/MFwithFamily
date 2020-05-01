@@ -6,7 +6,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -15,7 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import model.Balance;
 import model.User;
 /**
  * Servlet implementation class Balance
@@ -49,113 +50,133 @@ public class BalanceController extends HttpServlet {
 
 	private void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ClassNotFoundException, SQLException {
 		String mode = (String)request.getParameter("mode");
+		//ログアウト判定
 		if (mode == null) {
-			Balance balance = new Balance();
-			User user = fetchUserInfo();
-			balance = fetchTotalBalance(balance);
-	//		balance = fetchEachBalance(balance);
-			HttpSession session = request.getSession();
-			session.setAttribute("balance", balance);
-			session.setAttribute("user", user);
-			request.getRequestDispatcher(request.getContextPath()+"/balance.jsp")
-					.forward(request, response);
-		} else {
-			//セッションの全削除
-			HttpSession session = request.getSession();
-			Enumeration<String> en = session.getAttributeNames();
-			while(en.hasMoreElements()){
-			  String attributeName = (String)en.nextElement();
-			  session.removeAttribute(attributeName);
-			}
-			//アプリケーションスコープの全削除
-			ServletContext sc = getServletContext();
-			en = sc.getAttributeNames();
-			while(en.hasMoreElements()) {
-				String attributeName = (String)en.nextElement();
-				sc.removeAttribute(attributeName);
-			}
-			response.sendRedirect(request.getContextPath() + "/");
-		}
-	}
-
-	private Balance fetchTotalBalance(Balance balance) throws ClassNotFoundException, SQLException {
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
-		String user = System.getenv("HEROKU_DB_USER");
-		String password = System.getenv("HEROKU_DB_PASSWORD");
-		ServletContext sc = getServletContext();
-		int uid = (int)sc.getAttribute("uid");
-		try (
-			Connection conn = DriverManager.getConnection(url, user, password);
-			PreparedStatement ps =
-			conn.prepareStatement("SELECT SUM(price) AS total FROM household "
-					+ "INNER JOIN users ON household.user_id = users.id "
-					+ "WHERE users.id = " + uid
-//					+ "INNER JOIN family ON users.family_id = family.id"
-					+ ";");
-		) {
-			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				int total = rs.getInt("total");
-				balance.setTotalBalance(total);
+			ServletContext application = getServletContext();
+			int uid = (int) application.getAttribute("uid");
+			if (uid == -1) {
+				//ログイン画面へ遷移
+				response.sendRedirect(request.getContextPath() + "/");
 			} else {
-				return balance;
+				getUser(uid);
+				ArrayList<User> userList = new ArrayList<User>();
+				int familyId = (int) application.getAttribute("familyId");
+				if (familyId == -1) {
+					userList.add(getPersonalBalance(uid));
+				} else {
+					userList.addAll(getWholeFamilyBalance(familyId));
+				}
+				int totalBalance = 0;
+				for (User user : userList) {
+					totalBalance += user.getBalance();
+				}
+				userList.add(new User(-1, "合計", -1, familyId, false, totalBalance));
+				for (User user : userList) {
+					System.out.println(user.getName() + " : " + user.getBalance());
+				}
+				request.setAttribute("balanceList", userList);
+				request.getRequestDispatcher(request.getContextPath()+"/balance.jsp")
+						.forward(request, response);
 			}
-		} catch (SQLException e) {
-			System.out.println("SQL ERROR: " + e);
+		} else {
+			logout(request, response);
 		}
-		return balance;
 	}
 
-	private Balance fetchEachBalance(Balance balance) throws ClassNotFoundException, SQLException {
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
-		String user = System.getenv("HEROKU_DB_USER");
-		String password = System.getenv("HEROKU_DB_PASSWORD");
-		try (
-			Connection conn = DriverManager.getConnection(url, user, password);
-			PreparedStatement ps =
-			conn.prepareStatement("SELECT SUM(price) AS total, users.name AS name FROM household "
-					+ "INNER JOIN users ON household.user_id = users.id "
-					+ "INNER JOIN relationship ON users.relationship_id = relationship.id "
-					+ "GROUP BY users.id;");
-		) {
-			ResultSet rs = ps.executeQuery();
-			while(rs.next()) {
-				balance.addEachBalance(rs.getInt("total"), rs.getString("name"));
-			}
-			return balance;
-		} catch (SQLException e) {
-			System.out.println("SQL ERROR: " + e);
+	private void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		//セッションの全削除
+		HttpSession session = request.getSession();
+		Enumeration<String> en = session.getAttributeNames();
+		while(en.hasMoreElements()){
+		  String attributeName = (String)en.nextElement();
+		  session.removeAttribute(attributeName);
 		}
-		return balance;
+		//アプリケーションスコープの全削除
+		ServletContext sc = getServletContext();
+		en = sc.getAttributeNames();
+		while(en.hasMoreElements()) {
+			String attributeName = (String)en.nextElement();
+			sc.removeAttribute(attributeName);
+		}
+		//ログイン画面へ遷移
+		response.sendRedirect(request.getContextPath() + "/");
 	}
 
-	private User fetchUserInfo() throws ClassNotFoundException, SQLException {
+	private void getUser(int uid) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String dbUser = System.getenv("HEROKU_DB_USER");
 		String dbPassword = System.getenv("HEROKU_DB_PASSWORD");
-		ServletContext sc = getServletContext();
-		User user = null;
-		int uid = (int)sc.getAttribute("uid");
 		try (
 			Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
-			PreparedStatement ps = conn.prepareStatement("SELECT * FROM users WHERE id = ?");
+			PreparedStatement ps = conn.prepareStatement("SELECT name, family_id, relationship_id FROM users WHERE id = ?");
 		) {
 			ps.setInt(1, uid);
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
-				String name = rs.getString("name");
-				int relationshipId = rs.getInt("relationship_id");
-				int familyId = rs.getInt("family_id");
-				boolean emailCertificate = rs.getBoolean("email_certificate");
-				user = new User(uid, name, relationshipId, familyId, emailCertificate);
+				ServletContext application = getServletContext();
+				application.setAttribute("userName", rs.getString("name"));
+				application.setAttribute("relationshipId", rs.getInt("relationship_id"));
+				application.setAttribute("familyId", rs.getInt("family_id"));
+			}
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
+		}
+	}
+
+	private User getPersonalBalance(int uid) throws ClassNotFoundException, SQLException {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String dbUser = System.getenv("HEROKU_DB_USER");
+		String dbPassword = System.getenv("HEROKU_DB_PASSWORD");
+		User user = new User();
+		try (
+			Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
+			PreparedStatement ps = conn.prepareStatement("SELECT SUM(price) AS balance FROM household WHERE user_id = ?");
+		) {
+			ps.setInt(1, uid);
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				ServletContext application = getServletContext();
+				user.setBalance(rs.getInt("balance"));
+				String userName = (String) application.getAttribute("userName");
+				if (userName == null) userName = "あなた";
+				user.setName(userName);
 			}
 			return user;
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);
 		}
 		return user;
+	}
+
+	private List<User> getWholeFamilyBalance(int familyId) throws ClassNotFoundException, SQLException {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String dbUser = System.getenv("HEROKU_DB_USER");
+		String dbPassword = System.getenv("HEROKU_DB_PASSWORD");
+		List<User> balanceList = new ArrayList<User>();
+		try (
+			Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
+			PreparedStatement ps = conn.prepareStatement("SELECT SUM(price) AS balance, user_id, name "
+					+ "FROM household "
+					+ "INNER JOIN users ON users.id = household.user_id "
+					+ "WHERE users.family_id = ? "
+					+ "GROUP BY user_id;");
+		) {
+			ps.setLong(1, familyId);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				ServletContext application = getServletContext();
+				User user = new User();
+				user.setBalance(rs.getInt("balance"));
+				user.setName(rs.getString("name"));
+				balanceList.add(user);
+			}
+			return balanceList;
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
+		}
+		return balanceList;
 	}
 }

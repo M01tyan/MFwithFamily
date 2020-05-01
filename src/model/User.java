@@ -6,18 +6,17 @@ public class User {
 	private int relationshipId;
 	private int familyId;
 	private boolean emailCertificate;
+	private int balance;
 
-	public User() {
-		this.uid = -1;
-		this.emailCertificate = false;
-	}
+	public User() {}
 
-	public User(int uid, String name, int relationshipId, int familyId, boolean emailCertificate) {
+	public User(int uid, String name, int relationshipId, int familyId, boolean emailCertificate, int balance) {
 		this.uid = uid;
 		this.name = name;
 		this.relationshipId = relationshipId;
 		this.familyId = familyId;
 		this.emailCertificate = emailCertificate;
+		this.balance = balance;
 	}
 
 	public void setId(int id) {
@@ -53,5 +52,12 @@ public class User {
 	}
 	public boolean getEmailCertificate() {
 		return this.emailCertificate;
+	}
+
+	public void setBalance(int balance) {
+		this.balance = balance;
+	}
+	public int getBalance() {
+		return this.balance;
 	}
 }

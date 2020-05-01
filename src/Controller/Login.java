@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import Component.SendMail;
-import model.User;
 
 /**
  * Servlet implementation class Login
@@ -43,16 +42,17 @@ public class Login extends HttpServlet {
 		String email = (String) request.getParameter("email");
 		String password = (String) request.getParameter("password");
 		try {
-			User user = authentication(email, password);
-			int id = user.getId();
-			boolean emailCertificate = user.getEmailCertificate();
-			if (id != -1) {
-				ServletContext sc = getServletContext();
-				sc.setAttribute("uid", id);
+			ServletContext application = getServletContext();
+			login(email, password);
+			int uid = (int) application.getAttribute("uid");
+			Boolean emailCertificate = (Boolean) application.getAttribute("emailCertificate");
+			if (uid != -1) {
+				//メール認証済みかチェック
+				System.out.println("ログインしました！\nuid: " + uid);
 				if (emailCertificate != false) {
-					sc.setAttribute("emailCertificate", emailCertificate);
 					response.sendRedirect(request.getContextPath() + "/balance");
 				} else {
+					//認証コードの生成＆メール送信 -> 認証画面へ遷移
 					HttpSession session = request.getSession();
 					String sessionAuthCode = (String)session.getAttribute("code");
 					if (sessionAuthCode == null) {
@@ -75,23 +75,23 @@ public class Login extends HttpServlet {
 		}
 	}
 
-	private User authentication(String email, String password) throws ClassNotFoundException, SQLException {
+	private void login(String email, String password) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL")
 				+ "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String DBuser = System.getenv("HEROKU_DB_USER");
 		String DBpassword = System.getenv("HEROKU_DB_PASSWORD");
 		String secretKey = System.getenv("SECRET_KEY");
-		User user = new User();
 		try (
-				Connection conn = DriverManager.getConnection(url, DBuser, DBpassword);
-				PreparedStatement ps = conn.prepareStatement("SELECT "
-						+ "id, "
-						+ "email_certificate, "
-						+ "CONVERT(AES_DECRYPT(email, ?) USING utf8) AS email, "
-						+ "CONVERT(AES_DECRYPT(password, ?) USING utf8) AS password "
-						+ "FROM users "
-						+ "WHERE email=HEX(AES_ENCRYPT(?, ?)) AND password=HEX(AES_ENCRYPT(?, ?));");) {
+			Connection conn = DriverManager.getConnection(url, DBuser, DBpassword);
+			PreparedStatement ps = conn.prepareStatement("SELECT "
+					+ "id, "
+					+ "email_certificate, "
+					+ "CONVERT(AES_DECRYPT(email, ?) USING utf8) AS email, "
+					+ "CONVERT(AES_DECRYPT(password, ?) USING utf8) AS password "
+					+ "FROM users "
+					+ "WHERE email=HEX(AES_ENCRYPT(?, ?)) AND password=HEX(AES_ENCRYPT(?, ?));");
+		) {
 			ps.setString(1, secretKey);
 			ps.setString(2, secretKey);
 			ps.setString(3, email);
@@ -99,16 +99,17 @@ public class Login extends HttpServlet {
 			ps.setString(5, password);
 			ps.setString(6, secretKey);
 			ResultSet rs = ps.executeQuery();
+			ServletContext application = getServletContext();
 			if (rs.next()) {
-				user.setId(rs.getInt("id"));
-				user.setEmailCertificate(rs.getBoolean("email_certificate"));
-				return user;
+				application.setAttribute("uid", (int)rs.getInt("id"));
+				application.setAttribute("emailCertificate", (boolean)rs.getBoolean("email_certificate"));
 			} else {
+				application.setAttribute("uid", -1);
+				application.setAttribute("emailCertificate", false);
 				System.out.println("NOT USER");
 			}
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);
 		}
-		return user;
 	}
 }

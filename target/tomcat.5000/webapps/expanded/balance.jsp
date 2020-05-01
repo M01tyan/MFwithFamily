@@ -3,6 +3,7 @@
     pageEncoding="UTF-8"
     import="model.Balance"
     import="model.User"
+    import="java.util.*"
 %>
 <!DOCTYPE html>
 <html>
@@ -27,18 +28,25 @@ h1 {
 </head>
 <body>
 	<%
-		Balance balance = (Balance)session.getAttribute("balance");
-		User user = (User)session.getAttribute("user");
+		List<Balance> balanceList = (List<Balance>)request.getAttribute("balanceList");
+		/* User user = (User)application.getAttribute("user"); */
 	%>
 	<a href="${pageContext.request.contextPath}/balance?mode=logout">ログアウト</a>
 	<h1>残高</h1>
-	<p>家庭内全体</p><a href="${pageContext.request.contextPath}/household?id=0"><%= balance.getTotalBalance() %>円</a><BR>
-	<% int familyId = user.getFamilyId();
-	   	if (familyId == 0) {%>
+	<%
+		for (Balance balance : balanceList) {
+			String name = balance.getName();
+			if (name == null) name = "ユーザー";
+			out.println(name + " : " + balance.getPrice() + "<BR>");
+		}
+	%>
+	<%-- <p>家庭内全体</p><a href="${pageContext.request.contextPath}/household?id=0"><%= balance.getTotalBalance() %>円</a><BR> --%>
+	<%-- <% int familyId = user.getFamilyId();
+	   	if (familyId == -1) {%>
 	   		<p>家族との共有は<a href="${pageContext.request.contextPath}/share">こちら</a></p>
 	<%  } else {
 	}
-	%>
+	%> --%>
 	<!-- <div class="individual-balance">
 		<div><p style="color: blue">夫</p><a href="">0円</a></div>
 		<div><p style="color: red">妻</p><a href="">0円</a></div>
