@@ -1,28 +1,27 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Balance {
-	private int totalBalance;
-	private List<Integer> eachBalancePrice = new ArrayList<Integer>();
-	private List<String> eachBalanceName = new ArrayList<String>();
+	private String name;
+	private int price;
 
-	public void setTotalBalance(int totalBalance) {
-		this.totalBalance = totalBalance;
-	}
-	public int getTotalBalance() {
-		return this.totalBalance;
+	public Balance() {}
+
+	public Balance(String name, int price) {
+		this.name = name;
+		this.price = price;
 	}
 
-	public void addEachBalance(int price, String name) {
-		this.eachBalancePrice.add(price);
-		this.eachBalanceName.add(name);
+	public void setName(String name) {
+		this.name = name;
 	}
-	public int getEachBalancePrice(int index) {
-		return this.eachBalancePrice.get(index);
+	public String getName() {
+		return this.name;
 	}
-	public String getEachBalanceName(int index) {
-		return this.eachBalanceName.get(index);
+
+	public void setPrice(int price) {
+		this.price = price;
+	}
+	public int getPrice() {
+		return this.price;
 	}
 }

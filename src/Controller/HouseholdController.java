@@ -72,11 +72,13 @@ public class HouseholdController extends HttpServlet {
 					+ "memo, "
 					+ "transfer, "
 					+ "household.id AS id, "
-					+ "users.name AS user_name, "
-					+ "relationship.name AS relationship_name "
+					+ "users.name AS user_name "
+//					+ "relationship.name AS relationship_name "
 					+ "from household "
-					+ "INNER JOIN users ON users.id = household.user_id "
-					+ "INNER JOIN relationship ON users.relationship_id = relationship.id;");
+					+ "INNER JOIN users ON household.user_id = " + 131 + " "
+					+ "ORDER BY date DESC"
+//					+ "INNER JOIN relationship ON users.relationship_id = relationship.id"
+					+ ";");
 		) {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
@@ -92,7 +94,7 @@ public class HouseholdController extends HttpServlet {
 				household.setTransfer(rs.getInt("transfer"));
 				household.setId(rs.getString("id"));
 				household.setUserName(rs.getString("user_name"));
-				household.setRelationshipName(rs.getString("relationship_name"));
+//				household.setRelationshipName(rs.getString("relationship_name"));
 				list.add(household);
 			}
 		} catch (SQLException e) {
