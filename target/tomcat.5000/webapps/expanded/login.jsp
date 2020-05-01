@@ -14,10 +14,6 @@ body {
 .background {
 }
 
-h1 {
-	color: orange;
-}
-
 .cp_iptxt {
 	position: relative;
 	width: 50%;
@@ -69,11 +65,11 @@ input[type="submit"]:hover {
 }
 </style>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>Money Forward with Family</title>
 </head>
 <body>
 <div class="background">
-	<h1>Money Forward with Family</h1>
+	<h1>Money Forward <span style="color: orange;">with Family</span></h1>
 	<h2>ログイン</h2>
 	<% String message = (String)request.getAttribute("message"); %>
 	<span style="color: red"><%= message == null ? "" : message %></span>

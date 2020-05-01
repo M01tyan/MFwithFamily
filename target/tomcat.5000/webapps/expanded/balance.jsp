@@ -30,6 +30,7 @@ h1 {
 		Balance balance = (Balance)session.getAttribute("balance");
 		User user = (User)session.getAttribute("user");
 	%>
+	<a href="${pageContext.request.contextPath}/balance?mode=logout">ログアウト</a>
 	<h1>残高</h1>
 	<p>家庭内全体</p><a href="${pageContext.request.contextPath}/household?id=0"><%= balance.getTotalBalance() %>円</a><BR>
 	<% int familyId = user.getFamilyId();

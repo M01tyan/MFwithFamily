@@ -34,7 +34,7 @@ public class SendMail {
 	    return code;
 	}
 
-	private String createAuthCode() {
+	public static String createAuthCode() {
 		int FINAL_NUMBER = 4;
 		String code = "";
 		for (int i=0; i<FINAL_NUMBER; i++) {

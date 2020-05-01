@@ -48,7 +48,7 @@ public class SignUp extends HttpServlet {
 		if (!password.equals(confirmation)) message += "パスワードが一致しません<BR>";
 		if (message.isEmpty()) {
 			SendMail sendMail = new SendMail();
-			String code = sendMail.send(email);
+			String authCode = sendMail.send(email);
 			try {
 				int uid = createUser(email, password);
 				if (uid == -1) {
@@ -58,8 +58,8 @@ public class SignUp extends HttpServlet {
 				} else {
 					ServletContext sc = getServletContext();
 					sc.setAttribute("uid", uid);
-					session.setAttribute("code", code);
-					System.out.println("認証コード: " + code);
+					session.setAttribute("sessionAuthCode", authCode);
+					System.out.println("認証コード: " + authCode);
 					response.sendRedirect(request.getContextPath()+"/auth");
 				}
 			} catch (ClassNotFoundException | SQLException e) {

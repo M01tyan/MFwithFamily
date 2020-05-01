@@ -7,6 +7,11 @@ public class User {
 	private int familyId;
 	private boolean emailCertificate;
 
+	public User() {
+		this.uid = -1;
+		this.emailCertificate = false;
+	}
+
 	public User(int uid, String name, int relationshipId, int familyId, boolean emailCertificate) {
 		this.uid = uid;
 		this.name = name;

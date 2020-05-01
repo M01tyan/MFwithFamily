@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Enumeration;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -47,15 +48,34 @@ public class BalanceController extends HttpServlet {
 	}
 
 	private void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ClassNotFoundException, SQLException {
-		Balance balance = new Balance();
-		User user = fetchUserInfo();
-		balance = fetchTotalBalance(balance);
-//		balance = fetchEachBalance(balance);
-		HttpSession session = request.getSession();
-		session.setAttribute("balance", balance);
-		session.setAttribute("user", user);
-		request.getRequestDispatcher(request.getContextPath()+"/balance.jsp")
-				.forward(request, response);
+		String mode = (String)request.getParameter("mode");
+		if (mode == null) {
+			Balance balance = new Balance();
+			User user = fetchUserInfo();
+			balance = fetchTotalBalance(balance);
+	//		balance = fetchEachBalance(balance);
+			HttpSession session = request.getSession();
+			session.setAttribute("balance", balance);
+			session.setAttribute("user", user);
+			request.getRequestDispatcher(request.getContextPath()+"/balance.jsp")
+					.forward(request, response);
+		} else {
+			//セッションの全削除
+			HttpSession session = request.getSession();
+			Enumeration<String> en = session.getAttributeNames();
+			while(en.hasMoreElements()){
+			  String attributeName = (String)en.nextElement();
+			  session.removeAttribute(attributeName);
+			}
+			//アプリケーションスコープの全削除
+			ServletContext sc = getServletContext();
+			en = sc.getAttributeNames();
+			while(en.hasMoreElements()) {
+				String attributeName = (String)en.nextElement();
+				sc.removeAttribute(attributeName);
+			}
+			response.sendRedirect(request.getContextPath() + "/");
+		}
 	}
 
 	private Balance fetchTotalBalance(Balance balance) throws ClassNotFoundException, SQLException {
@@ -63,17 +83,20 @@ public class BalanceController extends HttpServlet {
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
+		ServletContext sc = getServletContext();
+		int uid = (int)sc.getAttribute("uid");
 		try (
 			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
 			conn.prepareStatement("SELECT SUM(price) AS total FROM household "
 					+ "INNER JOIN users ON household.user_id = users.id "
-					+ "INNER JOIN family ON users.family_id = family.id;");
+					+ "WHERE users.id = " + uid
+//					+ "INNER JOIN family ON users.family_id = family.id"
+					+ ";");
 		) {
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
 				int total = rs.getInt("total");
-				System.out.println(total);
 				balance.setTotalBalance(total);
 			} else {
 				return balance;

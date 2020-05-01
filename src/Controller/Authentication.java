@@ -42,10 +42,10 @@ public class Authentication extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("text/html; charset=UTF-8");
 		HttpSession session = request.getSession();
-		String inputCode = (String)request.getParameter("authCode");
-		String code = (String)session.getAttribute("code");
+		String inputAuthCode = (String)request.getParameter("authCode");
+		String sessionAuthCode = (String)session.getAttribute("sessionAuthCode");
 		String message = "";
-		if (code.equals(inputCode)) {
+		if (sessionAuthCode.equals(inputAuthCode)) {
 			System.out.println("Authentication Success!!");
 			try {
 				updateEmailCertificate();
