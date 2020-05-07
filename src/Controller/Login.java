@@ -14,7 +14,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.mashape.unirest.http.exceptions.UnirestException;
+
 import Component.SendMail;
+import model.User;
 
 /**
  * Servlet implementation class Login
@@ -43,13 +46,12 @@ public class Login extends HttpServlet {
 		String password = (String) request.getParameter("password");
 		try {
 			ServletContext application = getServletContext();
-			login(email, password);
-			int uid = (int) application.getAttribute("uid");
-			Boolean emailCertificate = (Boolean) application.getAttribute("emailCertificate");
-			if (uid != -1) {
+			User user = login(email, password);
+			if (user.getId() != -1) {
 				//メール認証済みかチェック
-				System.out.println("ログインしました！\nuid: " + uid);
-				if (emailCertificate != false) {
+				System.out.println("ログインしました！\nuid: " + user.getId());
+				application.setAttribute("user", user);
+				if (user.getEmailCertificate() != false) {
 					response.sendRedirect(request.getContextPath() + "/balance");
 				} else {
 					//認証コードの生成＆メール送信 -> 認証画面へ遷移
@@ -72,24 +74,31 @@ public class Login extends HttpServlet {
 		} catch (ClassNotFoundException | SQLException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
+		} catch (UnirestException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
 		}
 	}
 
-	private void login(String email, String password) throws ClassNotFoundException, SQLException {
+	private User login(String email, String password) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL")
 				+ "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String DBuser = System.getenv("HEROKU_DB_USER");
 		String DBpassword = System.getenv("HEROKU_DB_PASSWORD");
 		String secretKey = System.getenv("SECRET_KEY");
+		User user = new User();
 		try (
 			Connection conn = DriverManager.getConnection(url, DBuser, DBpassword);
 			PreparedStatement ps = conn.prepareStatement("SELECT "
-					+ "id, "
+					+ "users.id AS id, "
 					+ "email_certificate, "
+					+ "family_id, "
+					+ "family.auth_code AS share_code, "
 					+ "CONVERT(AES_DECRYPT(email, ?) USING utf8) AS email, "
 					+ "CONVERT(AES_DECRYPT(password, ?) USING utf8) AS password "
 					+ "FROM users "
+					+ "INNER JOIN family ON users.family_id = family.id "
 					+ "WHERE email=HEX(AES_ENCRYPT(?, ?)) AND password=HEX(AES_ENCRYPT(?, ?));");
 		) {
 			ps.setString(1, secretKey);
@@ -99,17 +108,26 @@ public class Login extends HttpServlet {
 			ps.setString(5, password);
 			ps.setString(6, secretKey);
 			ResultSet rs = ps.executeQuery();
-			ServletContext application = getServletContext();
+//			ServletContext application = getServletContext();
 			if (rs.next()) {
-				application.setAttribute("uid", (int)rs.getInt("id"));
-				application.setAttribute("emailCertificate", (boolean)rs.getBoolean("email_certificate"));
+				user.setId((int)rs.getInt("id"));
+				user.setEmailCertificate((boolean)rs.getBoolean("email_certificate"));
+				user.setFamilyId((int)rs.getInt("family_id"));
+//				application.setAttribute("uid", (int)rs.getInt("id"));
+//				application.setAttribute("emailCertificate", (boolean)rs.getBoolean("email_certificate"));
+//				application.setAttribute("familyId", (int)rs.getInt("family_id"));
+//				application.setAttribute("shareCode", (String)rs.getString("share_code"));
 			} else {
-				application.setAttribute("uid", -1);
-				application.setAttribute("emailCertificate", false);
+//				application.setAttribute("uid", -1);
+//				application.setAttribute("emailCertificate", false);
+//				application.setAttribute("familyId", -1);
+//				application.setAttribute("shareCode", null);
 				System.out.println("NOT USER");
 			}
+			return user;
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);
 		}
+		return user;
 	}
 }

@@ -53,28 +53,28 @@ public class BalanceController extends HttpServlet {
 		//ログアウト判定
 		if (mode == null) {
 			ServletContext application = getServletContext();
-			int uid = (int) application.getAttribute("uid");
-			if (uid == -1) {
+			User user = (User) application.getAttribute("user");
+			if (user.getId() == -1) {
 				//ログイン画面へ遷移
 				response.sendRedirect(request.getContextPath() + "/");
 			} else {
-				getUser(uid);
+				user = getUser(user);
 				ArrayList<User> userList = new ArrayList<User>();
-				int familyId = (int) application.getAttribute("familyId");
-				if (familyId == -1) {
-					userList.add(getPersonalBalance(uid));
+				if (user.getFamilyId() == -1) {
+					userList.add(getPersonalBalance(user.getId()));
 				} else {
-					userList.addAll(getWholeFamilyBalance(familyId));
+					userList.addAll(getWholeFamilyBalance(user.getFamilyId()));
 				}
 				int totalBalance = 0;
-				for (User user : userList) {
-					totalBalance += user.getBalance();
+				for (User v : userList) {
+					totalBalance += v.getBalance();
 				}
-				userList.add(new User(-1, "合計", -1, familyId, false, totalBalance));
-				for (User user : userList) {
-					System.out.println(user.getName() + " : " + user.getBalance());
+				userList.add(new User(-1, "合計", -1, user.getFamilyId(), false, totalBalance));
+				for (User v : userList) {
+					System.out.println(v.getName() + " : " + v.getBalance());
 				}
-				request.setAttribute("balanceList", userList);
+				application.setAttribute("user", user);
+				application.setAttribute("userList", userList);
 				request.getRequestDispatcher(request.getContextPath()+"/balance.jsp")
 						.forward(request, response);
 			}
@@ -102,7 +102,7 @@ public class BalanceController extends HttpServlet {
 		response.sendRedirect(request.getContextPath() + "/");
 	}
 
-	private void getUser(int uid) throws ClassNotFoundException, SQLException {
+	private User getUser(User user) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String dbUser = System.getenv("HEROKU_DB_USER");
@@ -111,17 +111,18 @@ public class BalanceController extends HttpServlet {
 			Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
 			PreparedStatement ps = conn.prepareStatement("SELECT name, family_id, relationship_id FROM users WHERE id = ?");
 		) {
-			ps.setInt(1, uid);
+			ps.setInt(1, user.getId());
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
-				ServletContext application = getServletContext();
-				application.setAttribute("userName", rs.getString("name"));
-				application.setAttribute("relationshipId", rs.getInt("relationship_id"));
-				application.setAttribute("familyId", rs.getInt("family_id"));
+				user.setName(rs.getString("name"));
+				user.setRelationshipId(rs.getInt("relationship_id"));
+				user.setFamilyId(rs.getInt("family_id"));
 			}
+			return user;
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);
 		}
+		return user;
 	}
 
 	private User getPersonalBalance(int uid) throws ClassNotFoundException, SQLException {
@@ -167,7 +168,6 @@ public class BalanceController extends HttpServlet {
 			ps.setLong(1, familyId);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
-				ServletContext application = getServletContext();
 				User user = new User();
 				user.setBalance(rs.getInt("balance"));
 				user.setName(rs.getString("name"));

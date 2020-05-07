@@ -6,22 +6,27 @@
   <packaging>war</packaging>
 
   <dependencies>
-      <dependency>
+	<dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>javax.servlet-api</artifactId>
         <version>3.0.1</version>
         <scope>provided</scope>
-      </dependency>
-      <dependency>
+	</dependency>
+	<dependency>
 	    <groupId>mysql</groupId>
 	    <artifactId>mysql-connector-java</artifactId>
 	    <version>8.0.19</version>
-	  </dependency>
-	  <dependency>
+	</dependency>
+	<dependency>
 	  	<groupId>com.sendgrid</groupId>
 	  	<artifactId>sendgrid-java</artifactId>
-	  	<version>4.4.8</version>
-	  </dependency>
+	  	<version>4.0.1</version>
+	</dependency>
+	<dependency>
+		<groupId>com.mashape.unirest</groupId>
+		<artifactId>unirest-java</artifactId>
+		<version>1.4.9</version>
+	</dependency>
   </dependencies>
 
   <build>

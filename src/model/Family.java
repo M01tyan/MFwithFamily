@@ -1,8 +1,13 @@
 package model;
 
+import java.util.List;
+
 public class Family {
 	private int id;
-	private String authCode;
+	private String shareCode;
+	private List<User> userList;
+
+	public Family() {}
 
 	public void setId(int id) {
 		this.id = id;
@@ -11,10 +16,17 @@ public class Family {
 		return this.id;
 	}
 
-	public void setAuthCode(String authCode) {
-		this.authCode = authCode;
+	public void setShareCode(String authCode) {
+		this.shareCode = authCode;
 	}
-	public String getAuthCode() {
-		return this.authCode;
+	public String getShareCode() {
+		return this.shareCode;
+	}
+
+	public void setUserList(List<User> userList) {
+		this.userList = userList;
+	}
+	public List<User> getUserList() {
+		return this.userList;
 	}
 }

@@ -27,16 +27,19 @@ h1 {
 </head>
 <body>
 	<%
-		List<User> userList = (List<User>)request.getAttribute("userList");
+		List<User> userList = (List<User>)application.getAttribute("userList");
 		/* User user = (User)application.getAttribute("user"); */
 	%>
-	<a href="${pageContext.request.contextPath}/balance?mode=logout">ログアウト</a>
+	<div style="display: flex; flex-direction: row; justify-content: space-around">
+		<a href="${pageContext.request.contextPath}/balance?mode=logout">ログアウト</a>
+		<a href="${pageContext.request.contextPath}/share">家族連携</a>
+	</div>
 	<h1>残高</h1>
 	<%
 		for (User user : userList) {
 			String name = user.getName();
 			if (name == null) name = "ユーザー";
-			out.println(name + " : " + user.getBalance() + "<BR>");
+			out.println(name + " : " + user.getBalance() + "円" + "<BR>");
 		}
 	%>
 </body>

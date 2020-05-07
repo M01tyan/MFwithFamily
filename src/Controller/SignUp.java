@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.mashape.unirest.http.exceptions.UnirestException;
+
 import Component.SendMail;
 public class SignUp extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -48,7 +50,13 @@ public class SignUp extends HttpServlet {
 		if (!password.equals(confirmation)) message += "パスワードが一致しません<BR>";
 		if (message.isEmpty()) {
 			SendMail sendMail = new SendMail();
-			String authCode = sendMail.send(email);
+			String authCode = "";
+			try {
+				authCode = sendMail.send(email);
+			} catch (UnirestException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			}
 			try {
 				int uid = createUser(email, password);
 				if (uid == -1) {
