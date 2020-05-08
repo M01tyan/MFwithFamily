@@ -27,7 +27,7 @@ h1 {
 </head>
 <body>
 	<%
-		List<User> userList = (List<User>)application.getAttribute("userList");
+		List<User> userList = (List<User>)session.getAttribute("userList");
 		/* User user = (User)application.getAttribute("user"); */
 	%>
 	<div style="display: flex; flex-direction: row; justify-content: space-around">

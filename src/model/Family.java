@@ -1,5 +1,6 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Family {
@@ -7,7 +8,11 @@ public class Family {
 	private String shareCode;
 	private List<User> userList;
 
-	public Family() {}
+	public Family() {
+		this.id = -1;
+		this.userList = new ArrayList<User>();
+		this.shareCode = null;
+	}
 
 	public void setId(int id) {
 		this.id = id;

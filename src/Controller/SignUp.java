@@ -10,7 +10,6 @@ import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import Component.SendMail;
+import model.Family;
 import model.User;
 public class SignUp extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -45,10 +45,11 @@ public class SignUp extends HttpServlet {
 		String email = (String)request.getParameter("email");
 		String password = (String)request.getParameter("password");
 		String confirmation = (String)request.getParameter("confirmation");
-		HttpSession session = request.getSession();
+		String name = (String) request.getParameter("name");
 		if (!emailValidation(email)) message += "正しいメールアドレスを入力してください<BR>";
 		if (!passwordValidation(password)) message += "パスワードは半角英数字で入力してください<BR>";
 		if (!password.equals(confirmation)) message += "パスワードが一致しません<BR>";
+		if (name.isEmpty()) message += "ユーザ名を入力してください<BR>";
 		if (message.isEmpty()) {
 			SendMail sendMail = new SendMail();
 			String authCode = "";
@@ -59,15 +60,16 @@ public class SignUp extends HttpServlet {
 				e1.printStackTrace();
 			}
 			try {
-				User user = createUser(email, password);
+				User user = createUser(email, password, name);
 				if (user.getId() == -1) {
 					message += "もうすでに登録されたメールアドレスです";
 					request.setAttribute("message", message);
 					request.getRequestDispatcher(request.getContextPath()+"/signUp.jsp").forward(request, response);
 				} else {
-					ServletContext application = getServletContext();
-					application.setAttribute("user", user);
+					HttpSession session = request.getSession();
+					session.setAttribute("user", user);
 					session.setAttribute("sessionAuthCode", authCode);
+					session.setAttribute("family", new Family());
 					System.out.println("認証コード: " + authCode);
 					response.sendRedirect(request.getContextPath()+"/auth");
 				}
@@ -100,7 +102,7 @@ public class SignUp extends HttpServlet {
 	    return m.find();
 	}
 
-	private User createUser(String email, String password) throws SQLException, ClassNotFoundException {
+	private User createUser(String email, String password, String name) throws SQLException, ClassNotFoundException {
 		System.out.println(email + " : " + password);
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
@@ -112,17 +114,19 @@ public class SignUp extends HttpServlet {
 			Connection conn = DriverManager.getConnection(url, DBUser, DBPassword);
 			PreparedStatement ps =
 					conn.prepareStatement("INSERT INTO users "
-							+ "(`email`, `password`) "
-							+ "VALUES (HEX(AES_ENCRYPT(?, ?)), HEX(AES_ENCRYPT(?, ?)));", Statement.RETURN_GENERATED_KEYS);
+							+ "(`email`, `password`, `name`) "
+							+ "VALUES (HEX(AES_ENCRYPT(?, ?)), HEX(AES_ENCRYPT(?, ?)), ?);", Statement.RETURN_GENERATED_KEYS);
 		) {
 			ps.setString(1, email);
 			ps.setString(2, secretKey);
 			ps.setString(3, password);
 			ps.setString(4, secretKey);
+			ps.setString(5, name);
 			ps.executeUpdate();
 			ResultSet res = ps.getGeneratedKeys();
 			if(res.next()) {
 				user.setId(res.getInt(1));
+				user.setName(name);
 				return user;
 			}
 		} catch (SQLException e) {
