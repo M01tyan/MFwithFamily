@@ -19,7 +19,6 @@ import model.Household;
 /**
  * Servlet implementation class List
  */
-//@WebServlet("/List")
 public class HouseholdController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	/**

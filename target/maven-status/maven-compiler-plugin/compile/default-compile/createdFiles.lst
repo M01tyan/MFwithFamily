@@ -5,6 +5,7 @@ Component/SendMail.class
 Controller/Authentication.class
 Controller/BreakdownController.class
 Controller/HouseholdController.class
+Controller/ShareController.class
 Controller/SignUp.class
 Controller/Login.class
 model/User.class

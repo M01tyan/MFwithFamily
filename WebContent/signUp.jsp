@@ -91,7 +91,12 @@ input[type="submit"]:hover {
 			<input type="password" placeholder="パスワード確認用" name="confirmation">
 			<i class="fa fa-user fa-lg fa-fw" aria-hidden="true"></i>
 		</div>
+		<div class="cp_iptxt">
+			<input type="text" placeholder="ユーザ名" name="name">
+			<i class="fa fa-user fa-lg fa-fw" aria-hidden="true"></i>
+		</div>
 		<div class="button_wrapper"><input class="button" type="submit" value="SIGNUP"></div>
+
 	</form>
 </body>
 </html>

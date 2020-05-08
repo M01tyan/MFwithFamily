@@ -7,14 +7,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.mashape.unirest.http.exceptions.UnirestException;
+
 import Component.SendMail;
+import model.Family;
+import model.User;
 
 /**
  * Servlet implementation class Login
@@ -42,19 +45,17 @@ public class Login extends HttpServlet {
 		String email = (String) request.getParameter("email");
 		String password = (String) request.getParameter("password");
 		try {
-			ServletContext application = getServletContext();
-			login(email, password);
-			int uid = (int) application.getAttribute("uid");
-			Boolean emailCertificate = (Boolean) application.getAttribute("emailCertificate");
-			if (uid != -1) {
+			HttpSession session = request.getSession();
+			User user = login(email, password, request);
+			if (user.getId() != -1) {
 				//メール認証済みかチェック
-				System.out.println("ログインしました！\nuid: " + uid);
-				if (emailCertificate != false) {
+				System.out.println("ログインしました！\nuid: " + user.getId() + " name: " + user.getName());
+				session.setAttribute("user", user);
+				if (user.getEmailCertificate() != false) {
 					response.sendRedirect(request.getContextPath() + "/balance");
 				} else {
 					//認証コードの生成＆メール送信 -> 認証画面へ遷移
-					HttpSession session = request.getSession();
-					String sessionAuthCode = (String)session.getAttribute("code");
+					String sessionAuthCode = (String) session.getAttribute("code");
 					if (sessionAuthCode == null) {
 						SendMail sendMail = new SendMail();
 						sessionAuthCode = sendMail.send(email);
@@ -67,31 +68,40 @@ public class Login extends HttpServlet {
 				message += "ログインできませんでした";
 				request.setAttribute("message", message);
 				request.getRequestDispatcher("/login.jsp").forward(request, response);
-//				response.sendRedirect(request.getContextPath() + "/");
+				//				response.sendRedirect(request.getContextPath() + "/");
 			}
 		} catch (ClassNotFoundException | SQLException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		} catch (UnirestException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
 	}
 
-	private void login(String email, String password) throws ClassNotFoundException, SQLException {
+	private User login(String email, String password, HttpServletRequest request)
+			throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL")
 				+ "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String DBuser = System.getenv("HEROKU_DB_USER");
 		String DBpassword = System.getenv("HEROKU_DB_PASSWORD");
 		String secretKey = System.getenv("SECRET_KEY");
+		User user = new User();
+		Family family = new Family();
 		try (
-			Connection conn = DriverManager.getConnection(url, DBuser, DBpassword);
-			PreparedStatement ps = conn.prepareStatement("SELECT "
-					+ "id, "
-					+ "email_certificate, "
-					+ "CONVERT(AES_DECRYPT(email, ?) USING utf8) AS email, "
-					+ "CONVERT(AES_DECRYPT(password, ?) USING utf8) AS password "
-					+ "FROM users "
-					+ "WHERE email=HEX(AES_ENCRYPT(?, ?)) AND password=HEX(AES_ENCRYPT(?, ?));");
-		) {
+				Connection conn = DriverManager.getConnection(url, DBuser, DBpassword);
+				PreparedStatement ps = conn.prepareStatement("SELECT "
+						+ "users.id AS id, "
+						+ "name, "
+						+ "email_certificate, "
+						+ "family_id, "
+						+ "family.auth_code AS share_code, "
+						+ "CONVERT(AES_DECRYPT(email, ?) USING utf8) AS email, "
+						+ "CONVERT(AES_DECRYPT(password, ?) USING utf8) AS password "
+						+ "FROM users "
+						+ "INNER JOIN family ON users.family_id = family.id "
+						+ "WHERE email=HEX(AES_ENCRYPT(?, ?)) AND password=HEX(AES_ENCRYPT(?, ?));");) {
 			ps.setString(1, secretKey);
 			ps.setString(2, secretKey);
 			ps.setString(3, email);
@@ -99,17 +109,21 @@ public class Login extends HttpServlet {
 			ps.setString(5, password);
 			ps.setString(6, secretKey);
 			ResultSet rs = ps.executeQuery();
-			ServletContext application = getServletContext();
+			HttpSession session = request.getSession();
 			if (rs.next()) {
-				application.setAttribute("uid", (int)rs.getInt("id"));
-				application.setAttribute("emailCertificate", (boolean)rs.getBoolean("email_certificate"));
+				user.setId((int) rs.getInt("id"));
+				user.setName(rs.getString("name"));
+				user.setEmailCertificate((boolean) rs.getBoolean("email_certificate"));
+				family.setId((int) rs.getInt("family_id"));
+				family.setShareCode((String) rs.getString("share_code"));
+				session.setAttribute("family", family);
 			} else {
-				application.setAttribute("uid", -1);
-				application.setAttribute("emailCertificate", false);
 				System.out.println("NOT USER");
 			}
+			return user;
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);
 		}
+		return user;
 	}
 }

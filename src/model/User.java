@@ -8,7 +8,13 @@ public class User {
 	private boolean emailCertificate;
 	private int balance;
 
-	public User() {}
+	public User() {
+		this.uid = -1;
+		this.relationshipId = -1;
+		this.familyId = -1;
+		this.emailCertificate = false;
+		this.balance = 0;
+	}
 
 	public User(int uid, String name, int relationshipId, int familyId, boolean emailCertificate, int balance) {
 		this.uid = uid;
