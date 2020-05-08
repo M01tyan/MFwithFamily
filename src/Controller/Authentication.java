@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import model.User;
 /**
  * Servlet implementation class Authentication
  */
@@ -64,15 +66,17 @@ public class Authentication extends HttpServlet {
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String DBUser = System.getenv("HEROKU_DB_USER");
 		String DBPassword = System.getenv("HEROKU_DB_PASSWORD");
-		ServletContext sc = getServletContext();
-		int uid = (int)sc.getAttribute("uid");
+		ServletContext application = getServletContext();
+		User user = (User)application.getAttribute("user");
 		try (
 			Connection conn = DriverManager.getConnection(url, DBUser, DBPassword);
 			PreparedStatement ps =
 					conn.prepareStatement("UPDATE users SET email_certificate=true WHERE id = ?;");
 		) {
-			ps.setInt(1, uid);
+			ps.setInt(1, user.getId());
 			ps.executeUpdate();
+			user.setEmailCertificate(true);
+			application.setAttribute("user", user);
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);
 		}

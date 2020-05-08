@@ -20,6 +20,7 @@ import javax.servlet.http.HttpSession;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import Component.SendMail;
+import model.User;
 public class SignUp extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -58,14 +59,14 @@ public class SignUp extends HttpServlet {
 				e1.printStackTrace();
 			}
 			try {
-				int uid = createUser(email, password);
-				if (uid == -1) {
+				User user = createUser(email, password);
+				if (user.getId() == -1) {
 					message += "もうすでに登録されたメールアドレスです";
 					request.setAttribute("message", message);
 					request.getRequestDispatcher(request.getContextPath()+"/signUp.jsp").forward(request, response);
 				} else {
-					ServletContext sc = getServletContext();
-					sc.setAttribute("uid", uid);
+					ServletContext application = getServletContext();
+					application.setAttribute("user", user);
 					session.setAttribute("sessionAuthCode", authCode);
 					System.out.println("認証コード: " + authCode);
 					response.sendRedirect(request.getContextPath()+"/auth");
@@ -99,14 +100,14 @@ public class SignUp extends HttpServlet {
 	    return m.find();
 	}
 
-	private int createUser(String email, String password) throws SQLException, ClassNotFoundException {
+	private User createUser(String email, String password) throws SQLException, ClassNotFoundException {
 		System.out.println(email + " : " + password);
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String DBUser = System.getenv("HEROKU_DB_USER");
 		String DBPassword = System.getenv("HEROKU_DB_PASSWORD");
 		String secretKey = System.getenv("SECRET_KEY");
-		int uid = -1;
+		User user = new User();
 		try (
 			Connection conn = DriverManager.getConnection(url, DBUser, DBPassword);
 			PreparedStatement ps =
@@ -121,11 +122,12 @@ public class SignUp extends HttpServlet {
 			ps.executeUpdate();
 			ResultSet res = ps.getGeneratedKeys();
 			if(res.next()) {
-				uid = res.getInt(1);
+				user.setId(res.getInt(1));
+				return user;
 			}
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);
 		}
-		return uid;
+		return user;
 	}
 }
