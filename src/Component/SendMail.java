@@ -8,12 +8,15 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 public class SendMail {
 	public String send(String email) throws UnirestException {
 		String code = createAuthCode();
-		HttpResponse<JsonNode> request = Unirest.post("https://api.mailgun.net/v3/" + "sandboxcc344b42ea404e4a9d8007c97e1c9ce6.mailgun.org" + "/messages")
-	            .basicAuth("api", "fe47e49c9540e7d868271d607381751c-0afbfc6c-4685dd4d")
-	            .field("from", "maeda.kanta@moneyforward.co.jp")
+		HttpResponse<JsonNode> request = Unirest.post("https://api.mailgun.net/v3/" + System.getenv("MAILGUN_DOMAIN") + "/messages")
+	            .basicAuth("api", System.getenv("MAILGUN_API_KEY"))
+	            .field("from", System.getenv("MAILGUN_FROM_MAIL"))
 	            .field("to", email)
-	            .field("subject", "Authentication code")
-	            .field("text", code)
+	            .field("subject", "認証コード")
+	            .field("text", "認証コードをお送りします。\n\n"
+	            		     + code +"\n\n"
+	            		     + "アプリの方で認証コードを入力し、アカウントを有効にしてください。\n"
+	            		     + "なお30分以内に認証しない場合は失効されます。")
 	            .asJson();
 
 		System.out.println(request.getBody());
