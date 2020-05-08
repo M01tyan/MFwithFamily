@@ -10,7 +10,7 @@ public class SendMail {
 		String code = createAuthCode();
 		HttpResponse<JsonNode> request = Unirest.post("https://api.mailgun.net/v3/" + "sandboxcc344b42ea404e4a9d8007c97e1c9ce6.mailgun.org" + "/messages")
 	            .basicAuth("api", "fe47e49c9540e7d868271d607381751c-0afbfc6c-4685dd4d")
-	            .field("from", "Excited User <USER@YOURDOMAIN.COM>")
+	            .field("from", "maeda.kanta@moneyforward.co.jp")
 	            .field("to", email)
 	            .field("subject", "Authentication code")
 	            .field("text", code)
