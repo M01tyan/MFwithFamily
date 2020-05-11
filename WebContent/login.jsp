@@ -5,87 +5,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-<style type="text/css">
-
-body {
-	text-align: center;
-	margin-top: 150px;
-}
-.background {
-}
-
-.cp_iptxt {
-	position: relative;
-	width: 50%;
-	margin: 20px auto;
-}
-.cp_iptxt input[type=text], .cp_iptxt input[type=password] {
-	font: 15px/24px sans-serif;
-	box-sizing: border-box;
-	width: 100%;
-	margin: 8px 0;
-	padding: 0.3em;
-	transition: 0.3s;
-	border: 1px solid #1b2538;
-	border-radius: 4px;
-	outline: none;
-}
-.cp_iptxt input[type=text]:focus, .cp_iptxt input[type=password]:focus {
-	border-color: #da3c41;
-}
-.cp_iptxt input[type=text], .cp_iptxt input[type=password] {
-	padding-left: 40px;
-}
-.cp_iptxt i {
-	position: absolute;
-	top: 8px;
-	left: 0;
-	padding: 9px 8px;
-	transition: 0.3s;
-	color: #aaaaaa;
-}
-.cp_iptxt input[type=text]:focus + i {
-	color: #da3c41;
-}
-.button {
-	padding: 20px 40px;
-	font-size: 1.2em;
-	border-style: none;
-	border: double 1px black;
-	color: orange;
-	margin-bottom: 20px;
-	background-color: white;
-}
-input[type="submit"]:hover {
-	background-color: orange;
-	color: white;
-}
-.new-accunt {
-	color: orange;
-}
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.orange-pink.min.css" />
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 <meta charset="UTF-8">
 <title>Money Forward with Family</title>
+<style>
+body {
+	text-align: center;
+}
+h1 {
+	padding-top: 150px;
+	margin-top: 0;
+	font-weight: bold;
+}
+form {
+	display: flex;
+	flex-direction: column;
+	justicy-content: center;
+	align-items: center;
+}
+.button {
+	color: orange;
+    background-color: white;
+    border: solid 1px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+.button:hover {
+	color: white;
+	background-color: orange;
+}
+#progress-bar {
+	width: 100%;
+	display: none;
+}
+</style>
 </head>
 <body>
-<div class="background">
+	<div id="progress-bar" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
 	<h1>Money Forward <span style="color: orange;">with Family</span></h1>
-	<h2>ログイン</h2>
 	<% String message = (String)request.getAttribute("message"); %>
+	<div style="height: 250px; width: 250px">
+	</div>
+	<h2 style="color: orange;">ログイン</h2>
 	<span style="color: red"><%= message == null ? "" : message %></span>
-	<form name="loginForm" action="login" method="post">
-		<div class="cp_iptxt">
-			<input type="text" placeholder="メールアドレス" name="email">
-			<i class="fa fa-user fa-lg fa-fw" aria-hidden="true"></i>
-		</div>
-		<div class="cp_iptxt">
-			<input type="password" placeholder="パスワード" name="password">
-			<i class="fa fa-user fa-lg fa-fw" aria-hidden="true"></i>
-		</div>
-		<div class="button_wrapper"><input class="button" type="submit" value="LOGIN"></div>
+	<form action="login" method="post">
+	  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+	    <input class="mdl-textfield__input" type="text" id="email" name="email">
+	    <label class="mdl-textfield__label" for="sample3">メールアドレス</label>
+	  </div>
+	  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+	    <input class="mdl-textfield__input" type="password" id="password" name="password">
+	    <label class="mdl-textfield__label" for="sample3">パスワード  </label>
+	  </div>
+	  <input id="submit-button" class="mdl-button mdl-js-button mdl-js-ripple-effect button" type="submit" value="ログイン">
 	</form>
-
 	<a href="${pageContext.request.contextPath}/signUp" class="new-accunt">新規登録</a>
-</div>
+	<script>
+		const submitButton = document.getElementById("submit-button");
+		const progressBar = document.getElementById("progress-bar");
+		submitButton.addEventListener('click', event => {
+			progressBar.style.cssText = "display: block;";
+		});
+	</script>
 </body>
 </html>
