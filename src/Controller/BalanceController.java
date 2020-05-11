@@ -72,7 +72,7 @@ public class BalanceController extends HttpServlet {
 				for (User v : userList) {
 					totalBalance += v.getBalance();
 				}
-				userList.add(new User(-1, "合計", -1, family.getId(), false, totalBalance));
+				userList.add(0, new User(-1, "合計", -1, family.getId(), false, totalBalance));
 				for (User v : userList) {
 					System.out.println(v.getName() + " : " + v.getBalance());
 				}

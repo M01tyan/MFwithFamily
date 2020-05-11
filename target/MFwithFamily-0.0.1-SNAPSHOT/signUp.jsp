@@ -3,95 +3,80 @@
 <!DOCTYPE html>
 <html>
 <head>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.orange-pink.min.css" />
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+<meta charset="UTF-8">
+<title>Money Forward with Family</title>
 <style>
 body {
 	text-align: center;
-	position: relative;
-	margin-top: 150px;
 }
 h1 {
+	padding-top: 150px;
+	margin-top: 0;
+	font-weight: bold;
+}
+form {
+	display: flex;
+	flex-direction: column;
+	justicy-content: center;
+	align-items: center;
+}
+.button {
 	color: orange;
+    background-color: white;
+    border: solid 1px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+.button:hover {
+	color: white;
+	background-color: orange;
 }
 a {
 	position: absolute;
-	left: 80px;
-	top: 10px;
+	top: 170px;
+	left: 50px;
 }
-.cp_iptxt {
-	position: relative;
-	width: 50%;
-	margin: 20px auto;
-}
-.cp_iptxt input[type=text], .cp_iptxt input[type=password] {
-	font: 15px/24px sans-serif;
-	box-sizing: border-box;
+#progress-bar {
 	width: 100%;
-	margin: 8px 0;
-	padding: 0.3em;
-	transition: 0.3s;
-	border: 1px solid #1b2538;
-	border-radius: 4px;
-	outline: none;
-}
-.cp_iptxt input[type=text]:focus, .cp_iptxt input[type=password]:focus {
-	border-color: #da3c41;
-}
-.cp_iptxt input[type=text], .cp_iptxt input[type=password] {
-	padding-left: 40px;
-}
-.cp_iptxt i {
-	position: absolute;
-	top: 8px;
-	left: 0;
-	padding: 9px 8px;
-	transition: 0.3s;
-	color: #aaaaaa;
-}
-.cp_iptxt input[type=text]:focus + i {
-	color: #da3c41;
-}
-.button {
-	padding: 20px 40px;
-	font-size: 1.2em;
-	border-style: none;
-	border: double 1px black;
-	color: orange;
-	margin-bottom: 20px;
-	background-color: white;
-}
-.note-txt {
-	font-size: 13px;
-	paddin-left: 0px;
-	color: grey;
-}
-input[type="submit"]:hover {
-	background-color: orange;
-	color: white;
+	display: none;
 }
 </style>
-<meta charset="UTF-8">
-<title>Money Forward with Family</title>
 </head>
 <body>
-	<h1>サインアップ</h1>
+	<div id="progress-bar" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
+	<h1>Money Forward <span style="color: orange;">with Family</span></h1>
 	<% String message = (String)request.getAttribute("message"); %>
-	<span style="color: red"><%= message == null ? "" : message %></span>
+	<h2 style="color: orange;">サインアップ</h2>
 	<a href="${pageContext.request.contextPath}/">&lt; 戻る</a>
-	<form name="signUpForm" action="signUp" method="post">
-		<div class="cp_iptxt">
-			<input type="text" placeholder="メールアドレス" name="email">
-			<i class="fa fa-user fa-lg fa-fw" aria-hidden="true"></i>
-		</div>
-		<p class="note-txt">パスワードは半角英数字で6~20文字で入力してください</p>
-		<div class="cp_iptxt">
-			<input type="password" placeholder="パスワード" name="password">
-			<i class="fa fa-user fa-lg fa-fw" aria-hidden="true"></i>
-		</div>
-		<div class="cp_iptxt">
-			<input type="password" placeholder="パスワード確認用" name="confirmation">
-			<i class="fa fa-user fa-lg fa-fw" aria-hidden="true"></i>
-		</div>
-		<div class="button_wrapper"><input class="button" type="submit" value="SIGNUP"></div>
+	<span style="color: red"><%= message == null ? "" : message %></span>
+	<form action="signUp" method="post">
+	  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+	    <input class="mdl-textfield__input" type="text" id="email" name="email">
+	    <label class="mdl-textfield__label" for="sample3">メールアドレス</label>
+	  </div>
+	  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+	    <input class="mdl-textfield__input" type="password" id="password" name="password">
+	    <label class="mdl-textfield__label" for="sample3">パスワード  </label>
+	  </div>
+	  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+	    <input class="mdl-textfield__input" type="password" id="confirmation" name="confirmation">
+	    <label class="mdl-textfield__label" for="sample3">パスワード確認用</label>
+	  </div>
+	  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+	    <input class="mdl-textfield__input" type="text" id="name" name="name">
+	    <label class="mdl-textfield__label" for="sample3">名前　　　　　　</label>
+	  </div>
+	  <input class="mdl-button mdl-js-button mdl-js-ripple-effect button" type="submit" value="新規登録" id="submit-button">
 	</form>
+	<script>
+		const submitButton = document.getElementById("submit-button");
+		const progressBar = document.getElementById("progress-bar");
+		submitButton.addEventListener('click', event => {
+			progressBar.style.cssText = "display: block;";
+		});
+	</script>
 </body>
 </html>

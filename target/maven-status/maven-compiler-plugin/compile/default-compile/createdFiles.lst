@@ -13,3 +13,4 @@ Controller/BalanceController.class
 model/Balance.class
 model/Household.class
 Component/AESCipher.class
+Component/Color.class
