@@ -3,23 +3,20 @@ package model;
 public class User {
 	private int uid;
 	private String name;
-	private int relationshipId;
 	private int familyId;
 	private boolean emailCertificate;
 	private int balance;
 
 	public User() {
 		this.uid = -1;
-		this.relationshipId = -1;
 		this.familyId = -1;
 		this.emailCertificate = false;
 		this.balance = 0;
 	}
 
-	public User(int uid, String name, int relationshipId, int familyId, boolean emailCertificate, int balance) {
+	public User(int uid, String name, int familyId, boolean emailCertificate, int balance) {
 		this.uid = uid;
 		this.name = name;
-		this.relationshipId = relationshipId;
 		this.familyId = familyId;
 		this.emailCertificate = emailCertificate;
 		this.balance = balance;
@@ -37,13 +34,6 @@ public class User {
 	}
 	public String getName() {
 		return this.name;
-	}
-
-	public void setRelationshipId(int relationshipId) {
-		this.relationshipId = relationshipId;
-	}
-	public int getRelationshipId() {
-		return this.relationshipId;
 	}
 
 	public void setFamilyId(int familyId) {
