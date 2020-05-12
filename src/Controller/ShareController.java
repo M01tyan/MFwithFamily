@@ -217,7 +217,7 @@ public class ShareController extends HttpServlet {
 		try (
 			Connection conn = DriverManager.getConnection(url, DBUser, DBPassword);
 			PreparedStatement ps =
-					conn.prepareStatement("SELECT users.id AS id, name, relationship_id, family_id, email_certificate "
+					conn.prepareStatement("SELECT users.id AS id, name, family_id, email_certificate "
 							+ "FROM users "
 							+ "INNER JOIN family ON users.family_id = family.id "
 							+ "WHERE family.auth_code = ?;", Statement.RETURN_GENERATED_KEYS);
@@ -227,19 +227,17 @@ public class ShareController extends HttpServlet {
 			if (rs.next()) {
 				int id = (int) rs.getInt("id");
 				String name = (String) rs.getString("name");
-				int relationshipId = (int) rs.getInt("relationship_id");
 				int familyId = (int) rs.getInt("family_id");
 				boolean emailCertificate = (Boolean) rs.getBoolean("email_certificate");
-				User u = new User(id, name, relationshipId, familyId, emailCertificate, 0);
+				User u = new User(id, name, familyId, emailCertificate, 0);
 				family.setId(familyId);
 				userList.add(u);
 				while (rs.next()) {
 					id = (int) rs.getInt("id");
 					name = (String) rs.getString("name");
-					relationshipId = (int) rs.getInt("relationship_id");
 					familyId = (int) rs.getInt("family_id");
 					emailCertificate = (Boolean) rs.getBoolean("email_certificate");
-					u = new User(id, name, relationshipId, familyId, emailCertificate, 0);
+					u = new User(id, name, familyId, emailCertificate, 0);
 					userList.add(u);
 				}
 				//入力者の情報を追加
@@ -264,12 +262,12 @@ public class ShareController extends HttpServlet {
 		try (
 			Connection conn = DriverManager.getConnection(url, DBUser, DBPassword);
 			PreparedStatement ps =
-					conn.prepareStatement("(SELECT @family_id := `family_id` AS family_id, users.id AS id, name, relationship_id, auth_code "
+					conn.prepareStatement("(SELECT @family_id := `family_id` AS family_id, users.id AS id, name, auth_code "
 							+ "FROM users "
 							+ "INNER JOIN family ON users.family_id = family.id "
 							+ "WHERE users.id = ?) "
 							+ "UNION "
-							+ "(SELECT family_id, users.id AS id, name, relationship_id, auth_code "
+							+ "(SELECT family_id, users.id AS id, name, auth_code "
 							+ "FROM users "
 							+ "INNER JOIN family ON users.family_id = family.id "
 							+ "WHERE family_id = @family_id);");
@@ -279,19 +277,17 @@ public class ShareController extends HttpServlet {
 			if (rs.next()) {
 				int id = (int) rs.getInt("id");
 				String name = (String) rs.getString("name");
-				int relationshipId = (int) rs.getInt("relationship_id");
 				int familyId = (int) rs.getInt("family_id");
 				String shareCode = (String) rs.getString("auth_code");
-				User u = new User(id, name, relationshipId, familyId, true, 0);
+				User u = new User(id, name, familyId, true, 0);
 				family.setId(familyId);
 				family.setShareCode(shareCode);
 				userList.add(u);
 				while (rs.next()) {
 					id = (int) rs.getInt("id");
 					name = (String) rs.getString("name");
-					relationshipId = (int) rs.getInt("relationship_id");
 					familyId = (int) rs.getInt("family_id");
-					u = new User(id, name, relationshipId, familyId, true, 0);
+					u = new User(id, name, familyId, true, 0);
 					userList.add(u);
 				}
 			}

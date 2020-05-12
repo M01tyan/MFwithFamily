@@ -12,7 +12,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import model.Household;
 
@@ -42,11 +41,11 @@ public class HouseholdController extends HttpServlet {
 	}
 
 	private void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ClassNotFoundException, SQLException {
-		int id = Integer.parseInt(request.getParameter("id"));
-		ArrayList<Household> householdList = id == 0 ? fetchAllHousehold() : fetchEachHousehold(id);
-		HttpSession session = request.getSession();
-		session.setAttribute("id", id);
-		session.setAttribute("householdList", householdList);
+//		int id = Integer.parseInt(request.getParameter("id"));
+//		ArrayList<Household> householdList = id == 0 ? fetchAllHousehold() : fetchEachHousehold(id);
+//		HttpSession session = request.getSession();
+//		session.setAttribute("id", id);
+//		session.setAttribute("householdList", householdList);
 		request.getRequestDispatcher(request.getContextPath()+"/household.jsp")
 			.forward(request, response);
 	}
@@ -61,7 +60,6 @@ public class HouseholdController extends HttpServlet {
 			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
 			conn.prepareStatement("SELECT "
-					+ "target, "
 					+ "date, "
 					+ "content, "
 					+ "price, "
@@ -72,17 +70,14 @@ public class HouseholdController extends HttpServlet {
 					+ "transfer, "
 					+ "household.id AS id, "
 					+ "users.name AS user_name "
-//					+ "relationship.name AS relationship_name "
 					+ "from household "
 					+ "INNER JOIN users ON household.user_id = " + 131 + " "
 					+ "ORDER BY date DESC"
-//					+ "INNER JOIN relationship ON users.relationship_id = relationship.id"
 					+ ";");
 		) {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				Household household = new Household();
-				household.setTarget(rs.getInt("target"));
 				household.setDate(rs.getString("date"));
 				household.setContent(rs.getString("content"));
 				household.setPrice(rs.getInt("price"));
@@ -90,10 +85,9 @@ public class HouseholdController extends HttpServlet {
 				household.setLargeItem(rs.getString("large_item"));
 				household.setMiddleItem(rs.getString("middle_item"));
 				household.setMemo(rs.getString("memo"));
-				household.setTransfer(rs.getInt("transfer"));
+				household.setTransfer(rs.getString("transfer"));
 				household.setId(rs.getString("id"));
 				household.setUserName(rs.getString("user_name"));
-//				household.setRelationshipName(rs.getString("relationship_name"));
 				list.add(household);
 			}
 		} catch (SQLException e) {
@@ -112,7 +106,6 @@ public class HouseholdController extends HttpServlet {
 			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
 			conn.prepareStatement("SELECT "
-					+ "target, "
 					+ "date, "
 					+ "content, "
 					+ "price, "
@@ -123,16 +116,13 @@ public class HouseholdController extends HttpServlet {
 					+ "transfer, "
 					+ "household.id AS id, "
 					+ "users.name AS user_name, "
-					+ "relationship.name AS relationship_name "
 					+ "from household "
 					+ "INNER JOIN users ON users.id = household.user_id "
-					+ "INNER JOIN relationship ON users.relationship_id = relationship.id "
 					+ "WHERE users.id = " + id + ";");
 		) {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				Household household = new Household();
-				household.setTarget(rs.getInt("target"));
 				household.setDate(rs.getString("date"));
 				household.setContent(rs.getString("content"));
 				household.setPrice(rs.getInt("price"));
@@ -140,10 +130,9 @@ public class HouseholdController extends HttpServlet {
 				household.setLargeItem(rs.getString("large_item"));
 				household.setMiddleItem(rs.getString("middle_item"));
 				household.setMemo(rs.getString("memo"));
-				household.setTransfer(rs.getInt("transfer"));
+				household.setTransfer(rs.getString("transfer"));
 				household.setId(rs.getString("id"));
 				household.setUserName(rs.getString("user_name"));
-				household.setRelationshipName(rs.getString("relationship_name"));
 				list.add(household);
 			}
 		} catch (SQLException e) {
