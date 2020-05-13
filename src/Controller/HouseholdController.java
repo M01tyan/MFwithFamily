@@ -15,8 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import model.Family;
 import model.Household;
+import model.User;
 
 /**
  * Servlet implementation class List
@@ -29,9 +29,10 @@ public class HouseholdController extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		int id = Integer.parseInt(request.getParameter("id"));
 		HttpSession session = request.getSession();
-		Family family = (Family) session.getAttribute("family");
+		List<User> userList = (List<User>) session.getAttribute("userList");
 		try {
-			List<String> financial = getFinancial(family.getId());
+			List<String> financialList = getFinancial(userList.get(id).getId());
+			session.setAttribute("financialList", financialList);
 		} catch (ClassNotFoundException | SQLException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
@@ -58,7 +59,7 @@ public class HouseholdController extends HttpServlet {
 //			.forward(request, response);
 //	}
 
-	private List<String> getFinancial(int familyId) throws ClassNotFoundException, SQLException {
+	private List<String> getFinancial(int uid) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
@@ -67,24 +68,16 @@ public class HouseholdController extends HttpServlet {
 		try (
 			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
-			conn.prepareStatement("SELECT "
-					+ "date, "
-					+ "content, "
-					+ "price, "
-					+ "financial, "
-					+ "large_item, "
-					+ "middle_item, "
-					+ "memo, "
-					+ "transfer, "
-					+ "household.id AS id, "
-					+ "users.name AS user_name "
-					+ "from household "
-					+ "INNER JOIN users ON household.user_id = " + 131 + " "
-					+ "ORDER BY date DESC"
-					+ ";");
+			conn.prepareStatement("SELECT users.id AS user_id, users.name AS user_name, financial.name AS financial_name "
+					+ "FROM users "
+					+ "INNER JOIN financial ON users.id = financial.user_id "
+					+ "WHERE users.id = ?;");
 		) {
+			ps.setInt(1, uid);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
+				String user_name = rs.getInt("user_id") == uid ? "あなた" : rs.getString("user_name");
+				financial.add(rs.getString("financial_name"));
 			}
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);

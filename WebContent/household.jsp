@@ -188,6 +188,7 @@ table {
 </style>
 </head>
 <body>
+	<!-- 大項目をjsに送る -->
 	<% List<String> largeItemList = new ArrayList<String>(Arrays.asList("食費", "日用品", "趣味・娯楽", "交際費", "交通費", "衣服・美容", "健康・医療", "自動車", "教養・教育", "特別な支出", "現金・カード", "水道・光熱費", "通信費", "住宅", "税・社会保障", "保険", "その他", "未分類")); %>
 	<form name="large_item">
 		<% for (String largeItem : largeItemList ) { %>
@@ -215,6 +216,7 @@ table {
           	</div>
 		</div>
 	</div>
+	<% List<String> financialList = (List<String>) session.getAttribute("financialList"); %>
 	<a href="${pageContext.request.contextPath}/balance" style="position: absolute; left: 50px; top: 80px;" id="back-button">&lt; 戻る</a>
 	<h3 style="color: orange;">家計簿入力</h3>
 	<div class="input-household">
@@ -234,10 +236,9 @@ table {
 				    <label class="mdl-textfield__label" for="sample3">口座</label>
 
 					<ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="financial">
-					  <li class="mdl-menu__item">Some Action</li>
-					  <li class="mdl-menu__item">Another Action</li>
-					  <li disabled class="mdl-menu__item">Disabled Action</li>
-					  <li class="mdl-menu__item">Yet Another Action</li>
+						<% for (String financial : financialList) { %>
+						<li class="mdl-menu__item"><%= financial %></li>
+						<% } %>
 					</ul>
 				</div>
 				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--1-col" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 35px; margin-top: 20px;">
@@ -251,10 +252,9 @@ table {
 				    <label class="mdl-textfield__label" for="sample3">振替先</label>
 
 					<ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="transfer">
-					  <li class="mdl-menu__item">Some Action</li>
-					  <li class="mdl-menu__item">Another Action</li>
-					  <li disabled class="mdl-menu__item">Disabled Action</li>
-					  <li class="mdl-menu__item">Yet Another Action</li>
+						<% for (String financial : financialList) { %>
+						<li class="mdl-menu__item"><%= financial %></li>
+						<% } %>
 					</ul>
 				</div>
 			</div>
