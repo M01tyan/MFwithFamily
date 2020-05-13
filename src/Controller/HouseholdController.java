@@ -1,6 +1,7 @@
 package Controller;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import model.Financial;
 import model.Household;
 import model.User;
 
@@ -31,7 +34,7 @@ public class HouseholdController extends HttpServlet {
 		HttpSession session = request.getSession();
 		List<User> userList = (List<User>) session.getAttribute("userList");
 		try {
-			List<String> financialList = getFinancial(userList.get(id).getId());
+			List<Financial> financialList = getFinancial(userList.get(id).getId());
 			session.setAttribute("financialList", financialList);
 		} catch (ClassNotFoundException | SQLException e) {
 			// TODO 自動生成された catch ブロック
@@ -45,8 +48,36 @@ public class HouseholdController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-//		doGet(request, response);
+		request.setCharacterEncoding("utf-8");
+		String date = request.getParameter("date");
+		int price = Integer.parseInt(request.getParameter("price"));
+		String financial = request.getParameter("financial");
+		boolean isTransfer = Boolean.valueOf(request.getParameter("isTransfer"));
+		String transfer = request.getParameter("transfer");
+		String content = request.getParameter("content");
+		String largeItem = request.getParameter("largeItem");
+		String middleItem = request.getParameter("middleItem");
+		String memo = request.getParameter("memo");
+		int id = Integer.parseInt(request.getParameter("id"));
+		HttpSession session = request.getSession();
+		List<Financial> financialList = (List<Financial>) session.getAttribute("financialList");
+		User user = (User) session.getAttribute("user");
+
+		String householdId = "";
+		try {
+			do {
+				householdId = createId();
+			} while (!checkUniqueShareCode(householdId));
+			addHousehold(date, content, price, financialList.get(id).getId(), largeItem, middleItem, memo, isTransfer, householdId, user.getId());
+			String message = "success";
+			String responseJson = "{\"message\":\"" + message + "\"}";
+			response.setContentType("application/json;charset=UTF-8");
+			PrintWriter out = response.getWriter();
+			out.write(responseJson);
+		} catch (ClassNotFoundException | SQLException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
 	}
 
 //	private void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ClassNotFoundException, SQLException {
@@ -59,16 +90,16 @@ public class HouseholdController extends HttpServlet {
 //			.forward(request, response);
 //	}
 
-	private List<String> getFinancial(int uid) throws ClassNotFoundException, SQLException {
+	private List<Financial> getFinancial(int uid) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
-		List<String> financial = new ArrayList<String>();
+		List<Financial> financial = new ArrayList<Financial>();
 		try (
 			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
-			conn.prepareStatement("SELECT users.id AS user_id, users.name AS user_name, financial.name AS financial_name "
+			conn.prepareStatement("SELECT financial.id AS id, users.id AS user_id, users.name AS user_name, financial.name AS financial_name, balance "
 					+ "FROM users "
 					+ "INNER JOIN financial ON users.id = financial.user_id "
 					+ "WHERE users.id = ?;");
@@ -77,12 +108,78 @@ public class HouseholdController extends HttpServlet {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				String user_name = rs.getInt("user_id") == uid ? "あなた" : rs.getString("user_name");
-				financial.add(rs.getString("financial_name"));
+				financial.add(new Financial(rs.getInt("id"), rs.getString("financial_name"), user_name, rs.getInt("user_id"), rs.getInt("balance")));
 			}
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);
 		}
 		return financial;
+	}
+
+	private void addHousehold(String date, String content, int price, int financialId, String largeItem, String middleItem, String memo, boolean isTransfer, String id, int uid) throws ClassNotFoundException, SQLException {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
+		try (
+			Connection conn = DriverManager.getConnection(url, user, password);
+			PreparedStatement ps =
+					conn.prepareStatement("INSERT INTO household "
+							+ "(`date`, `content`, `price`, `financial_id`, `large_item`, `middle_item`, `memo`, `transfer`, `id`, `user_id`) "
+							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+		) {
+			ps.setString(1, date);
+			ps.setString(2, content);
+			ps.setInt(3, price);
+			ps.setInt(4, financialId);
+			ps.setString(5, largeItem);
+			ps.setString(6, middleItem);
+			ps.setString(7, memo);
+			ps.setBoolean(8, isTransfer);
+			ps.setString(9, id);
+			ps.setInt(10, uid);
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
+		}
+	}
+
+	private String createId() {
+		Random r = new Random();
+		String alphabet = "abcdefghijklmnopqrstuv-_wxyzABCDEFGHIJKLMNOPQRSTUVWXY-_Z01234567890123456789";
+
+		int shareCodeLength = 22;
+		String id = "";
+
+		for (int i=0; i<shareCodeLength; i++) {
+			id += alphabet.charAt(r.nextInt(alphabet.length()));
+		}
+		return id;
+	}
+
+	private boolean checkUniqueShareCode(String id) throws ClassNotFoundException, SQLException {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
+		try (
+			Connection conn = DriverManager.getConnection(url, user, password);
+			PreparedStatement ps =
+			conn.prepareStatement("SELECT * FROM household WHERE id = ?");
+		) {
+			ps.setString(1, id);
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				System.out.println("NOT UNIQUE SHARE CODE!!!");
+				return false;
+			} else {
+				System.out.println("UNIQUE SHARE CODE!");
+				return true;
+			}
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
+		}
+		return false;
 	}
 
 	private ArrayList<Household> fetchAllHousehold() throws ClassNotFoundException, SQLException {
