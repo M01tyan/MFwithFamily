@@ -188,12 +188,14 @@ table {
 </style>
 </head>
 <body>
-	<% List<String> largeItemList = new ArrayList<String>(Arrays.asList("食費", "日用品", "趣味・娯楽", "交際費", "交通費", "衣服・美容", "健康・医療", "自動車", "教養・教育", "特別な支出", "現金・カード", "水道・光熱費", "通信費", "住宅", "税・社会保障", "保険", "その他", "未分類")); %>
-	<form name="large_item">
-		<% for (String largeItem : largeItemList ) { %>
-		<input type="hidden" name="large_item" value="<%= largeItem %>">
+	<%
+	List<String> largeItemList = new ArrayList<String>(Arrays.asList("食費", "日用品", "趣味・娯楽", "交際費", "交通費", "衣服・美容", "健康・医療", "自動車", "教養・教育", "特別な支出", "現金・カード", "水道・光熱費", "通信費", "住宅", "税・社会保障", "保険", "その他", "未分類"));
+	List<String> financialList = (List<String>) session.getAttribute("financialList");
+	%>
+	<form name="financial_form">
+		<% for (String financial : financialList) { %>
+			<input type="hidden" name="financial" value="<%= financial %>">
 		<% } %>
-		<% %>
 	</form>
 	<div id="progress-bar" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
 	<div class="android-header mdl-layout__header mdl-layout__header--waterfall">
@@ -230,14 +232,13 @@ table {
 				    <p style="margin: auto;">円</p>
 				</div>
 				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--3-col">
-				    <input type="button" class="mdl-textfield__input" id="financial" style="height: 44px;" value="お財布">
+				    <input type="button" class="mdl-textfield__input" id="financial" style="height: 44px;" value="<%= financialList.get(0) %>">
 				    <label class="mdl-textfield__label" for="sample3">口座</label>
 
 					<ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="financial">
-					  <li class="mdl-menu__item">Some Action</li>
-					  <li class="mdl-menu__item">Another Action</li>
-					  <li disabled class="mdl-menu__item">Disabled Action</li>
-					  <li class="mdl-menu__item">Yet Another Action</li>
+						<% for (String financial : financialList) { %>
+						<li class="mdl-menu__item financial"><%= financial %></li>
+						<% } %>
 					</ul>
 				</div>
 				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--1-col" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 35px; margin-top: 20px;">
@@ -247,14 +248,17 @@ table {
 					</button>
 				</div>
 				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--3-col" id="transfer-menu" style="display: none;">
-				    <input type="button" class="mdl-textfield__input" id="transfer" style="height: 44px;" value="お財布">
+				    <input type="button" class="mdl-textfield__input" id="transfer" style="height: 44px;" value="<%= financialList.get(0) %>">
 				    <label class="mdl-textfield__label" for="sample3">振替先</label>
 
-					<ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="transfer">
-					  <li class="mdl-menu__item">Some Action</li>
-					  <li class="mdl-menu__item">Another Action</li>
-					  <li disabled class="mdl-menu__item">Disabled Action</li>
-					  <li class="mdl-menu__item">Yet Another Action</li>
+					<ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="transfer" id="transfer-liset__parent">
+					<%  for (int i=0; i<financialList.size(); i++) {
+						   if (i==0) { %>
+						<li disabled class="mdl-menu__item transfer"><%= financialList.get(i) %></li>
+						<% } else { %>
+						<li class="mdl-menu__item transfer"><%= financialList.get(i) %></li>
+						<% }
+						}%>
 					</ul>
 				</div>
 			</div>
@@ -333,6 +337,7 @@ table {
 	  	</tbody>
 	</table>
 	<script>
+		//本日の日付を初期値
 		const today = new Date();
 		today.setDate(today.getDate());
 		const yyyy = today.getFullYear();
@@ -340,6 +345,7 @@ table {
 		const dd = ("0"+today.getDate()).slice(-2);
 		document.getElementById("date").value=yyyy+'-'+mm+'-'+dd;
 
+		//振替ボタンを押した際の振替先の表示切り替え
 		var isTransfer = false;
 		const transferButton = document.getElementById("transfer-button");
 		transferButton.addEventListener('click', button => {
@@ -351,6 +357,7 @@ table {
 			}
 		});
 
+		//項目選択時の表示切り替え
 		const middleItemMap = {
 			"食費": ["食費", "食料品", "外食", "朝ごはん", "昼ごはん", "夜ごはん", "カフェ", "その他食費"],
 			"日用品": ["日用品", "子育て用品", "ドラッグストア", "おこづかい", "ペット用品", "タバコ", "その他日用品"],
@@ -373,12 +380,10 @@ table {
 		};
 		const largeItems = document.getElementsByClassName("large-item");
 		const largeItemText = document.getElementById("large-item");
-		const largeItemList = document.large_item.large_item;
 		const middleItemList = document.getElementById('midle-item__list');
 		Array.from(largeItems).forEach(item => {
 			item.addEventListener('click', event => {
-				index = [].slice.call(largeItems).indexOf(item);
-				const largeItem = largeItemList[index].value;
+				const largeItem = event.currentTarget.innerText;
 				largeItemText.value = largeItem;
 				while (middleItemList.firstChild) {
 					middleItemList.removeChild(middleItemList.firstChild);
@@ -394,14 +399,39 @@ table {
 				const middleItemText = document.getElementById("middle-item");
 				Array.from(middleItems).forEach(item => {
 					item.addEventListener('click', event => {
-						index = [].slice.call(middleItems).indexOf(item);
-						middleItemText.value = middleItemMap[largeItem][index];
+						middleItemText.value = event.currentTarget.innerText;
 					});
 				});
 			});
 		});
 
+		//口座選択時の切り替え
+		const financials = document.getElementsByClassName("financial");
+		const financialText = document.getElementById("financial");
+		const transfers = document.getElementsByClassName("transfer");
+		Array.from(financials).forEach(financial => {
+			financial.addEventListener('click', event => {
+				const index = [].slice.call(financials).indexOf(financial);
+				financialText.value = event.currentTarget.innerText;
+				Array.from(transfers).forEach(transfer => {
+					transfer.removeAttribute("disabled");
+				});
+				transfers[index].setAttribute("disabled", "disabled");
+			});
+		});
 
+		//振替先選択時の切り替え
+
+		const transferText = document.getElementById("transfer");
+		Array.from(transfers).forEach(transfer => {
+			transfer.addEventListener('click', event => {
+				if (!event.currentTarget.getAttribute("disabled")) {
+					transferText.value = event.currentTarget.innerText;
+				}
+			});
+		});
+
+		//戻るボタンを押したときのローディング表示
 		const backButton = document.getElementById("back-button");
 		const progressBar = document.getElementById("progress-bar");
 		backButton.addEventListener('click', event => {
