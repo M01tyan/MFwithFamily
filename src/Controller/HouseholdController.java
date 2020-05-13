@@ -7,12 +7,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import model.Family;
 import model.Household;
 
 /**
@@ -24,12 +27,17 @@ public class HouseholdController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		int id = Integer.parseInt(request.getParameter("id"));
+		HttpSession session = request.getSession();
+		Family family = (Family) session.getAttribute("family");
 		try {
-			doIt(request, response);
-		} catch (ClassNotFoundException | ServletException | IOException | SQLException e) {
+			List<String> financial = getFinancial(family.getId());
+		} catch (ClassNotFoundException | SQLException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
+		request.getRequestDispatcher(request.getContextPath()+"/household.jsp")
+		.forward(request, response);
 	}
 
 	/**
@@ -37,17 +45,51 @@ public class HouseholdController extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		doGet(request, response);
+//		doGet(request, response);
 	}
 
-	private void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ClassNotFoundException, SQLException {
-//		int id = Integer.parseInt(request.getParameter("id"));
-//		ArrayList<Household> householdList = id == 0 ? fetchAllHousehold() : fetchEachHousehold(id);
-//		HttpSession session = request.getSession();
-//		session.setAttribute("id", id);
-//		session.setAttribute("householdList", householdList);
-		request.getRequestDispatcher(request.getContextPath()+"/household.jsp")
-			.forward(request, response);
+//	private void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ClassNotFoundException, SQLException {
+////		int id = Integer.parseInt(request.getParameter("id"));
+////		ArrayList<Household> householdList = id == 0 ? fetchAllHousehold() : fetchEachHousehold(id);
+////		HttpSession session = request.getSession();
+////		session.setAttribute("id", id);
+////		session.setAttribute("householdList", householdList);
+//		request.getRequestDispatcher(request.getContextPath()+"/household.jsp")
+//			.forward(request, response);
+//	}
+
+	private List<String> getFinancial(int familyId) throws ClassNotFoundException, SQLException {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
+		List<String> financial = new ArrayList<String>();
+		try (
+			Connection conn = DriverManager.getConnection(url, user, password);
+			PreparedStatement ps =
+			conn.prepareStatement("SELECT "
+					+ "date, "
+					+ "content, "
+					+ "price, "
+					+ "financial, "
+					+ "large_item, "
+					+ "middle_item, "
+					+ "memo, "
+					+ "transfer, "
+					+ "household.id AS id, "
+					+ "users.name AS user_name "
+					+ "from household "
+					+ "INNER JOIN users ON household.user_id = " + 131 + " "
+					+ "ORDER BY date DESC"
+					+ ";");
+		) {
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+			}
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
+		}
+		return financial;
 	}
 
 	private ArrayList<Household> fetchAllHousehold() throws ClassNotFoundException, SQLException {

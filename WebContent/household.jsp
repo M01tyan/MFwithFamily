@@ -162,7 +162,6 @@ h1 {
 	width: 100%;
 	display: none;
 }
-
 .button {
 	color: orange;
     background-color: white;
@@ -190,6 +189,12 @@ table {
 </head>
 <body>
 	<% List<String> largeItemList = new ArrayList<String>(Arrays.asList("食費", "日用品", "趣味・娯楽", "交際費", "交通費", "衣服・美容", "健康・医療", "自動車", "教養・教育", "特別な支出", "現金・カード", "水道・光熱費", "通信費", "住宅", "税・社会保障", "保険", "その他", "未分類")); %>
+	<form name="large_item">
+		<% for (String largeItem : largeItemList ) { %>
+		<input type="hidden" name="large_item" value="<%= largeItem %>">
+		<% } %>
+		<% %>
+	</form>
 	<div id="progress-bar" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
 	<div class="android-header mdl-layout__header mdl-layout__header--waterfall">
 		<div class="mdl-layout__header-row">
@@ -262,7 +267,7 @@ table {
 				    <input type="button" class="mdl-textfield__input" id="large-item" style="height: 44px;" value="未分類">
 				    <label class="mdl-textfield__label" for="sample3">大項目</label>
 
-					<ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="large-item">
+					<ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="large-item" style="height: 200px; overflow-y: scroll;">
 						<% for (String item : largeItemList) { %>
 							<li class="mdl-menu__item large-item" ><%= item %></li>
 						<% } %>
@@ -272,11 +277,7 @@ table {
 				    <input type="button" class="mdl-textfield__input" id="middle-item" style="height: 44px;" value="未分類">
 				    <label class="mdl-textfield__label" for="sample3">中項目</label>
 
-					<ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="middle-item">
-					  <li class="mdl-menu__item">Some Action</li>
-					  <li class="mdl-menu__item">Another Action</li>
-					  <li disabled class="mdl-menu__item">Disabled Action</li>
-					  <li class="mdl-menu__item">Yet Another Action</li>
+					<ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="middle-item" id="midle-item__list" style="height: 200px; overflow-y: scroll;">
 					</ul>
 				</div>
 				<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--3-col">
@@ -350,18 +351,64 @@ table {
 			}
 		});
 
+		const middleItemMap = {
+			"食費": ["食費", "食料品", "外食", "朝ごはん", "昼ごはん", "夜ごはん", "カフェ", "その他食費"],
+			"日用品": ["日用品", "子育て用品", "ドラッグストア", "おこづかい", "ペット用品", "タバコ", "その他日用品"],
+			"趣味・娯楽": ["外食", "パソコン機器", "アウトドア", "ゴルフ", "スポーツ", "映画・音楽・ゲーム", "本", "旅行", "秘密の趣味", "その他趣味・娯楽"],
+			"交際費": ["交際費", "飲み会", "プレゼント代", "冠婚葬祭", "その他交際費"],
+			"交通費": ["交通費", "電車", "バス", "タクシー", "飛行機", "その他交通費"],
+			"衣服・美容": ["衣服", "クリーニング", "理容院・理髪", "化粧品", "アクセサリー", "その他衣服・美容"],
+			"健康・医療": ["フィットネス", "ボディケア", "医療費",  "薬", "その他健康・医療"],
+			"自動車": ["自動車ローン", "道路料金", "ガソリン", "駐車場", "車両", "車検・整備", "自動車保険", "その他自動車"],
+			"教養・教育": ["書籍", "新聞・雑誌", "習いごと", "学費", "塾", "その他教養・教育"],
+			"特別な支出": ["引っ越し", "家具・家電", "住宅・リフォーム", "その他特別な支出"],
+			"現金・カード": ["ATM引き出し", "カード引き落とし", "電子マネー", "使途不明金", "その他現金・カード"],
+			"水道・光熱費": ["光熱費", "電気代", "ガス・灯油代", "水道代", "その他水道・光熱費"],
+			"通信費": ["携帯電話", "固定電話", "インターネット", "放送視聴料", "情報サービス", "宅配便・運送", "その他通信費"],
+			"住宅": ["住宅", "家賃・地代", "ローン返済", "管理費・積立金", "地震・火災保険", "その他住宅"],
+			"税・社会保障": ["所得税・住民税", "年金保険料", "健康保険", "その他税・社会保障"],
+			"保険": ["生命保険", "医療保険", "その他保険"],
+			"その他": ["仕送り", "事業経費", "事業原価", "事業投資", "寄付金", "雑費"],
+			"未分類": ["未分類"]
+		};
 		const largeItems = document.getElementsByClassName("large-item");
+		const largeItemText = document.getElementById("large-item");
+		const largeItemList = document.large_item.large_item;
+		const middleItemList = document.getElementById('midle-item__list');
 		Array.from(largeItems).forEach(item => {
 			item.addEventListener('click', event => {
-				console.log(event.currentTarget);
+				index = [].slice.call(largeItems).indexOf(item);
+				const largeItem = largeItemList[index].value;
+				largeItemText.value = largeItem;
+				while (middleItemList.firstChild) {
+					middleItemList.removeChild(middleItemList.firstChild);
+				}
+				middleItemMap[largeItem].map(middleItem => {
+					const li = document.createElement('li');
+					li.classList.add("mdl-menu__item")
+					li.classList.add("middle-item");
+					li.innerText = middleItem;
+					middleItemList.appendChild(li);
+				});
+				const middleItems = document.getElementsByClassName("middle-item");
+				const middleItemText = document.getElementById("middle-item");
+				Array.from(middleItems).forEach(item => {
+					item.addEventListener('click', event => {
+						index = [].slice.call(middleItems).indexOf(item);
+						middleItemText.value = middleItemMap[largeItem][index];
+					});
+				});
 			});
 		});
+
 
 		const backButton = document.getElementById("back-button");
 		const progressBar = document.getElementById("progress-bar");
 		backButton.addEventListener('click', event => {
 			progressBar.style.cssText = "display: block;";
 		});
+
+
 	</script>
 </body>
 </html>

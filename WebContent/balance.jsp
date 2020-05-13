@@ -197,11 +197,10 @@ h1 {
 				<%
 					for (int i=1; i<userList.size(); i++) {
 						String name = userList.get(i).getName();
-						System.out.println("name: " + name);
 						if (name.equals(user.getName())) name = "あなた";
 						String color = colors.get(i).getThinColor();
 				%>
-				<a href="${pageContext.request.contextPath}/household" class="mdl-cell mdl-cell--4-col" style="position: relative; width: 154px;">
+				<a href="${pageContext.request.contextPath}/household?id=<%= i %>" class="mdl-cell mdl-cell--4-col" style="position: relative; width: 154px;">
 				  	<svg width="154" height="136" viewBox="0 0 154 136" fill="none" xmlns="http://www.w3.org/2000/svg">
 						<path d="M151.59 75.8373C165.015 117.098 119.852 136 78.1462 136C36.4399 136 -11.8742 113.18 2.63036 75.8373C15.5233 42.6441 36.4399 15.6746 78.1462 15.6746C119.852 15.6746 141.69 45.4102 151.59 75.8373Z" fill="<%=color%>"/>
 						<ellipse cx="68.9369" cy="8.29831" rx="8.28832" ry="8.29831" fill="<%=color%>"/>
