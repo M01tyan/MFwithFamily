@@ -1,7 +1,6 @@
 package Controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -34,8 +33,11 @@ public class HouseholdController extends HttpServlet {
 		HttpSession session = request.getSession();
 		List<User> userList = (List<User>) session.getAttribute("userList");
 		try {
-			List<Financial> financialList = getFinancial(userList.get(id).getId());
+			int uid = userList.get(id).getId();
+			List<Financial> financialList = getFinancial(uid);
+			List<Household> householdList = fetchEachHousehold(uid);
 			session.setAttribute("financialList", financialList);
+			session.setAttribute("householdList", householdList);
 		} catch (ClassNotFoundException | SQLException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
@@ -61,24 +63,137 @@ public class HouseholdController extends HttpServlet {
 		int id = Integer.parseInt(request.getParameter("id"));
 		HttpSession session = request.getSession();
 		List<Financial> financialList = (List<Financial>) session.getAttribute("financialList");
-		User user = (User) session.getAttribute("user");
-
-		String householdId = "";
+		List<User> userList = (List<User>) session.getAttribute("userList");
+		int financialId = getFinancialIdFromFinancialName(financialList, financial);
+		int transferId = getFinancialIdFromFinancialName(financialList, transfer);
+		int uid = userList.get(id).getId();
 		try {
-			do {
-				householdId = createId();
-			} while (!checkUniqueShareCode(householdId));
-			addHousehold(date, content, price, financialList.get(id).getId(), largeItem, middleItem, memo, isTransfer, householdId, user.getId());
-			String message = "success";
-			String responseJson = "{\"message\":\"" + message + "\"}";
-			response.setContentType("application/json;charset=UTF-8");
-			PrintWriter out = response.getWriter();
-			out.write(responseJson);
+			if (!isTransfer) {
+				recordExpense(date, content, -price, financialId, largeItem, middleItem, memo, isTransfer, uid);
+			} else {
+				recordTransfer(date, content, price, financialId, transferId, memo, isTransfer, uid);
+			}
 		} catch (ClassNotFoundException | SQLException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
+
 		}
 	}
+
+	private void recordExpense(String date, String content, int price, int financialId, String largeItem, String middleItem, String memo, boolean isTransfer, int uid) throws ClassNotFoundException, SQLException {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
+		String householdId = "";
+		do {
+			householdId = createId();
+		} while (!checkUniqueHouseholdId(householdId));
+		try (
+			Connection conn = DriverManager.getConnection(url, user, password);
+			PreparedStatement ps1 = conn.prepareStatement("INSERT INTO household "
+							+ "(`date`, `content`, `price`, `financial_id`, `large_item`, `middle_item`, `memo`, `transfer`, `id`, `user_id`) "
+							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+			PreparedStatement ps2 = conn.prepareStatement("UPDATE financial SET balance = balance + ? WHERE id = ?;");
+		) {
+			conn.setAutoCommit(false);
+
+			ps1.setString(1, date);
+			ps1.setString(2, content);
+			ps1.setInt(3, price);
+			ps1.setInt(4, financialId);
+			ps1.setString(5, "");
+			ps1.setString(6, "");
+			ps1.setString(7, memo);
+			ps1.setBoolean(8, isTransfer);
+			ps1.setString(9, householdId);
+			ps1.setInt(10, uid);
+			ps1.executeUpdate();
+
+			ps2.setInt(1, price);
+			ps2.setInt(2, financialId);
+			ps2.executeUpdate();
+
+			try {
+		        //データベースに登録
+		        conn.commit();
+		        System.out.println("登録成功");
+		    } catch (SQLException e) {
+		        //ロールバック処理ですべての変更を取り消し
+		        conn.rollback();
+		        System.out.println("登録失敗：ロールバック実行");
+		        e.printStackTrace();
+		    }
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
+		}
+	}
+
+	private void recordTransfer(String date, String content, int price, int financialId, int transferId, String memo, boolean isTransfer, int uid) throws ClassNotFoundException, SQLException {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
+		String householdId1 = "";
+		String householdId2 = "";
+		do {
+			householdId1 = createId();
+			householdId2 = createId();
+		} while (!checkUniqueHouseholdId(householdId1) && !checkUniqueHouseholdId(householdId2));
+		try (
+			Connection conn = DriverManager.getConnection(url, user, password);
+			PreparedStatement ps1 = conn.prepareStatement("INSERT INTO household "
+							+ "(`date`, `content`, `price`, `financial_id`, `large_item`, `middle_item`, `memo`, `transfer`, `id`, `user_id`) "
+							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+			PreparedStatement ps2 = conn.prepareStatement("UPDATE financial SET balance = balance + ? WHERE id = ?;")
+		) {
+			conn.setAutoCommit(false);
+
+			ps1.setString(1, date);
+			ps1.setString(2, content);
+			ps1.setInt(3, -price);
+			ps1.setInt(4, financialId);
+			ps1.setString(5, "");
+			ps1.setString(6, "");
+			ps1.setString(7, memo);
+			ps1.setBoolean(8, isTransfer);
+			ps1.setString(9, householdId1);
+			ps1.setInt(10, uid);
+			ps1.executeUpdate();
+
+			ps2.setInt(1, -price);
+			ps2.setInt(2, financialId);
+			ps2.executeUpdate();
+
+			ps1.setString(1, date);
+			ps1.setString(2, content);
+			ps1.setInt(3, price);
+			ps1.setInt(4, transferId);
+			ps1.setString(5, "");
+			ps1.setString(6, "");
+			ps1.setString(7, memo);
+			ps1.setBoolean(8, isTransfer);
+			ps1.setString(9, householdId2);
+			ps1.setInt(10, uid);
+			ps1.executeUpdate();
+
+			ps2.setInt(1, price);
+			ps2.setInt(2, transferId);
+			ps2.executeUpdate();
+
+			try {
+		        //データベースに登録
+		        conn.commit();
+		        System.out.println("登録成功");
+		    } catch (SQLException e) {
+		        //ロールバック処理ですべての変更を取り消し
+		        conn.rollback();
+		        System.out.println("登録失敗：ロールバック実行");
+		        e.printStackTrace();
+		    }
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
+		}
+	}
+
 
 //	private void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ClassNotFoundException, SQLException {
 ////		int id = Integer.parseInt(request.getParameter("id"));
@@ -116,9 +231,16 @@ public class HouseholdController extends HttpServlet {
 		return financial;
 	}
 
+	public int getFinancialIdFromFinancialName(List<Financial> financialList, String financialName) {
+		for (Financial financial : financialList) {
+			if (financial.getFinancialName().equals(financialName)) return financial.getId();
+		}
+		return -1;
+	}
+
 	private void addHousehold(String date, String content, int price, int financialId, String largeItem, String middleItem, String memo, boolean isTransfer, String id, int uid) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		try (
@@ -144,6 +266,23 @@ public class HouseholdController extends HttpServlet {
 		}
 	}
 
+	private void changeBalance(int financialId, int price) throws ClassNotFoundException, SQLException {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
+		try (
+			Connection conn = DriverManager.getConnection(url, user, password);
+			PreparedStatement ps = conn.prepareStatement("UPDATE financial SET balance = balance + ? WHERE id = ?");
+		) {
+			ps.setInt(1, price);
+			ps.setInt(2, financialId);
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
+		}
+	}
+
 	private String createId() {
 		Random r = new Random();
 		String alphabet = "abcdefghijklmnopqrstuv-_wxyzABCDEFGHIJKLMNOPQRSTUVWXY-_Z01234567890123456789";
@@ -157,7 +296,7 @@ public class HouseholdController extends HttpServlet {
 		return id;
 	}
 
-	private boolean checkUniqueShareCode(String id) throws ClassNotFoundException, SQLException {
+	private boolean checkUniqueHouseholdId(String id) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
@@ -170,10 +309,10 @@ public class HouseholdController extends HttpServlet {
 			ps.setString(1, id);
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
-				System.out.println("NOT UNIQUE SHARE CODE!!!");
+				System.out.println("NOT UNIQUE HOUSEHOLD ID!!!");
 				return false;
 			} else {
-				System.out.println("UNIQUE SHARE CODE!");
+				System.out.println("UNIQUE HOUSEHOLD ID!");
 				return true;
 			}
 		} catch (SQLException e) {
@@ -182,8 +321,8 @@ public class HouseholdController extends HttpServlet {
 		return false;
 	}
 
-	private ArrayList<Household> fetchAllHousehold() throws ClassNotFoundException, SQLException {
-		ArrayList<Household> list = new ArrayList<Household>();
+	private List<Household> fetchAllHousehold() throws ClassNotFoundException, SQLException {
+		List<Household> list = new ArrayList<Household>();
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
@@ -217,7 +356,7 @@ public class HouseholdController extends HttpServlet {
 				household.setLargeItem(rs.getString("large_item"));
 				household.setMiddleItem(rs.getString("middle_item"));
 				household.setMemo(rs.getString("memo"));
-				household.setTransfer(rs.getString("transfer"));
+				household.setTransfer(rs.getBoolean("transfer"));
 				household.setId(rs.getString("id"));
 				household.setUserName(rs.getString("user_name"));
 				list.add(household);
@@ -228,8 +367,8 @@ public class HouseholdController extends HttpServlet {
 		return list;
 	}
 
-	private ArrayList<Household> fetchEachHousehold(int id) throws ClassNotFoundException, SQLException {
-		ArrayList<Household> list = new ArrayList<Household>();
+	private List<Household> fetchEachHousehold(int uid) throws ClassNotFoundException, SQLException {
+		List<Household> list = new ArrayList<Household>();
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
 		String user = System.getenv("HEROKU_DB_USER");
@@ -241,17 +380,19 @@ public class HouseholdController extends HttpServlet {
 					+ "date, "
 					+ "content, "
 					+ "price, "
-					+ "financial, "
+					+ "financial.name AS financial, "
 					+ "large_item, "
 					+ "middle_item, "
 					+ "memo, "
 					+ "transfer, "
 					+ "household.id AS id, "
-					+ "users.name AS user_name, "
-					+ "from household "
-					+ "INNER JOIN users ON users.id = household.user_id "
-					+ "WHERE users.id = " + id + ";");
+					+ "users.name AS user_name "
+					+ "FROM household "
+					+ "INNER JOIN users ON household.user_id = users.id "
+					+ "INNER JOIN financial ON household.financial_id = financial.id "
+					+ "WHERE users.id = ?;");
 		) {
+			ps.setInt(1, uid);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				Household household = new Household();
@@ -262,7 +403,7 @@ public class HouseholdController extends HttpServlet {
 				household.setLargeItem(rs.getString("large_item"));
 				household.setMiddleItem(rs.getString("middle_item"));
 				household.setMemo(rs.getString("memo"));
-				household.setTransfer(rs.getString("transfer"));
+				household.setTransfer(rs.getBoolean("transfer"));
 				household.setId(rs.getString("id"));
 				household.setUserName(rs.getString("user_name"));
 				list.add(household);

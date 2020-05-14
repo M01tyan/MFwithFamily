@@ -8,13 +8,13 @@ public class Household {
 	private String largeItem;
 	private String middleItem;
 	private String memo;
-	private String transfer;
+	private boolean transfer;
 	private String id;
 	private String userName;
 
 	public Household() {}
 
-	public Household(String date, String content, int price, String financial, String largeItem, String middleItem, String memo, String transfer, String id, String userName) {
+	public Household(String date, String content, int price, String financial, String largeItem, String middleItem, String memo, boolean transfer, String id, String userName) {
 		this.date = date;
 		this.content = content;
 		this.price = price;
@@ -76,10 +76,10 @@ public class Household {
 		return this.memo;
 	}
 
-	public void setTransfer(String transfer) {
+	public void setTransfer(boolean transfer) {
 		this.transfer = transfer;
 	}
-	public String getTransfer() {
+	public boolean getTransfer() {
 		return this.transfer;
 	}
 
