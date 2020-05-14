@@ -2,6 +2,7 @@
 	pageEncoding="UTF-8" import="model.Household" import="model.Analytics"
 	import="java.util.*"
 	import="model.Financial"
+	import="model.Household"
 %>
 <!DOCTYPE html>
 <html>
@@ -227,6 +228,7 @@ button:focus {
 	List<String> largeItemList = new ArrayList<String>(Arrays.asList("食費", "日用品", "趣味・娯楽", "交際費", "交通費", "衣服・美容", "健康・医療",
 			"自動車", "教養・教育", "特別な支出", "現金・カード", "水道・光熱費", "通信費", "住宅", "税・社会保障", "保険", "その他", "未分類"));
 	List<Financial> financialList = (List<Financial>) session.getAttribute("financialList");
+	List<Household> householdList = (List<Household>) session.getAttribute("householdList");
 	%>
 	<div id="progress-bar"
 		class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
@@ -248,7 +250,7 @@ button:focus {
 						class="mdl-navigation__link mdl-typography--text-uppercase"
 						href="${pageContext.request.contextPath}/share">家族追加</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
-						href="">連携口座</a> <a
+						href="${pageContext.request.contextPath}/financial">連携口座</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
 						href="">マイメニュー</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
@@ -388,14 +390,14 @@ button:focus {
 		<h3>2020年05月</h3>
 		<p style="margin: auto; margin-left: 10px;">&gt;</p>
 	</div>
-	<%
+	<%-- <%
 	List<Household> householdList = new ArrayList<Household>();
 	householdList.add(new Household("2020/05/12", "購入", -30000, "Kyash", "食費", "その他教養・教育", "", "", "8kaoirguw093", "あああ"));
 	for (int i = 0; i < 20; i++) {
 		householdList.add(new Household("2020/05/12", "購入 PREMIUMSELECTIONRAKUTE", -3000, "Kyash", "水道・光熱費", "その他教養・教育", "",
 		"", "8kaoirguw093", "あああ"));
 	}
-	%>
+	%> --%>
 	<table
 		class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp "
 		style="margin-bottom: 50px;">
@@ -564,12 +566,12 @@ button:focus {
 				memo: memo.value,
 				id: id
 		    };
-			console.log(data);
 			if (data.isTransfer == true && data.financial == data.transfer) {
 				alert("振込元の口座と振込先の口座が同じです");
 			} else if (data.price.length == 0) {
 				alert("金額を入力してください");
 			} else {
+				progressBar.style.cssText = "display: block;";
 				$.ajax({
 					type    : "POST",
 				    url     : path[0],
@@ -586,9 +588,7 @@ button:focus {
 				    }
 				});
 			}
-		})
-
-
+		});
 	</script>
 </body>
 </html>

@@ -169,7 +169,7 @@ h1 {
             	<nav class="android-navigation mdl-navigation">
               		<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/balance">残高</a>
               		<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/share">家族追加</a>
-		           	<a class="mdl-navigation__link mdl-typography--text-uppercase" href="">連携口座</a>
+		           	<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/financial?id=1">連携口座</a>
 		          	<a class="mdl-navigation__link mdl-typography--text-uppercase" href="">マイメニュー</a>
 		        	<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/balance?mode=logout">ログアウト</a>
             	</nav>
@@ -184,33 +184,35 @@ h1 {
 	%>
 	<h2 style="color: orange; margin-top: 80px;">残高</h2>
 	<div class="wallet">
-		<div style="position: relative;">
-			<svg width="335" height="295" viewBox="0 0 335 295" fill="none" xmlns="http://www.w3.org/2000/svg">
-				<path d="M329.212 164.5C358.368 254 260.287 295 169.712 295C79.1378 295 -25.7875 245.5 5.71244 164.5C33.7124 92.5 79.1378 34 169.712 34C260.287 34 307.712 98.5 329.212 164.5Z" fill="#FAB97D"/>
-				<circle cx="149.712" cy="18" r="18" fill="#FAB97D"/>
-				<circle cx="185.712" cy="18" r="18" fill="#FAB97D"/>
-			</svg>
-			<p class="wallet-price" style="font-size: 40px; color: white">¥<%= userList.get(0).getBalance() %></p>
-		</div>
-		<h3>全体</h3>
-			<div class="mdl-grid">
-				<%
-					for (int i=1; i<userList.size(); i++) {
-						String name = userList.get(i).getName();
-						if (name.equals(user.getName())) name = "あなた";
-						String color = colors.get(i).getThinColor();
-				%>
-				<a href="${pageContext.request.contextPath}/household?id=<%= i %>" class="mdl-cell mdl-cell--4-col" style="position: relative; width: 154px;">
-				  	<svg width="154" height="136" viewBox="0 0 154 136" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M151.59 75.8373C165.015 117.098 119.852 136 78.1462 136C36.4399 136 -11.8742 113.18 2.63036 75.8373C15.5233 42.6441 36.4399 15.6746 78.1462 15.6746C119.852 15.6746 141.69 45.4102 151.59 75.8373Z" fill="<%=color%>"/>
-						<ellipse cx="68.9369" cy="8.29831" rx="8.28832" ry="8.29831" fill="<%=color%>"/>
-						<ellipse cx="85.5135" cy="8.29831" rx="8.28832" ry="8.29831" fill="<%=color%>"/>
-					</svg>
-					<p class="wallet-price" id="price">¥<%= userList.get(i).getBalance() %></p>
-					<p><%= name %></p>
-				</a>
-				<% } %>
+		<a href="${pageContext.request.contextPath}/financial?id=0">
+			<div style="position: relative;">
+				<svg width="335" height="295" viewBox="0 0 335 295" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M329.212 164.5C358.368 254 260.287 295 169.712 295C79.1378 295 -25.7875 245.5 5.71244 164.5C33.7124 92.5 79.1378 34 169.712 34C260.287 34 307.712 98.5 329.212 164.5Z" fill="#FAB97D"/>
+					<circle cx="149.712" cy="18" r="18" fill="#FAB97D"/>
+					<circle cx="185.712" cy="18" r="18" fill="#FAB97D"/>
+				</svg>
+				<p class="wallet-price" style="font-size: 40px; color: white">¥<%= userList.get(0).getBalance() %></p>
 			</div>
+			<h3>全体</h3>
+		</a>
+		<div class="mdl-grid">
+			<%
+				for (int i=1; i<userList.size(); i++) {
+					String name = userList.get(i).getName();
+					if (name.equals(user.getName())) name = "あなた";
+					String color = colors.get(i).getThinColor();
+			%>
+			<a href="${pageContext.request.contextPath}/financial?id=<%= i %>" class="mdl-cell mdl-cell--4-col" style="position: relative; width: 154px;">
+			  	<svg width="154" height="136" viewBox="0 0 154 136" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M151.59 75.8373C165.015 117.098 119.852 136 78.1462 136C36.4399 136 -11.8742 113.18 2.63036 75.8373C15.5233 42.6441 36.4399 15.6746 78.1462 15.6746C119.852 15.6746 141.69 45.4102 151.59 75.8373Z" fill="<%=color%>"/>
+					<ellipse cx="68.9369" cy="8.29831" rx="8.28832" ry="8.29831" fill="<%=color%>"/>
+					<ellipse cx="85.5135" cy="8.29831" rx="8.28832" ry="8.29831" fill="<%=color%>"/>
+				</svg>
+				<p class="wallet-price" id="price">¥<%= userList.get(i).getBalance() %></p>
+				<p><%= name %></p>
+			</a>
+			<% } %>
+		</div>
 	</div>
 	<script>
 		const navigationButton = document.querySelectorAll("a");
@@ -220,8 +222,6 @@ h1 {
 				progressBar.style.cssText = "display: block;";
 			});
 		});
-		const p = document.getElementsByClassName("wallet-price");
-		console.log(p);
 	</script>
 </body>
 </html>
