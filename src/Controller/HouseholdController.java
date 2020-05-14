@@ -194,17 +194,6 @@ public class HouseholdController extends HttpServlet {
 		}
 	}
 
-
-//	private void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ClassNotFoundException, SQLException {
-////		int id = Integer.parseInt(request.getParameter("id"));
-////		ArrayList<Household> householdList = id == 0 ? fetchAllHousehold() : fetchEachHousehold(id);
-////		HttpSession session = request.getSession();
-////		session.setAttribute("id", id);
-////		session.setAttribute("householdList", householdList);
-//		request.getRequestDispatcher(request.getContextPath()+"/household.jsp")
-//			.forward(request, response);
-//	}
-
 	private List<Financial> getFinancial(int uid) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";

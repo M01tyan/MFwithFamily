@@ -56,7 +56,6 @@ public class BalanceController extends HttpServlet {
 			HttpSession session = request.getSession();
 			User user = (User) session.getAttribute("user");
 			Family family = (Family) session.getAttribute("family");
-			System.out.println("<HOME画面>\nuid: " + user.getId() + " name: " + user.getName() + " familyId: " + family.getId());
 			if (user.getId() == -1) {
 				//ログイン画面へ遷移
 				response.sendRedirect(request.getContextPath() + "/");
@@ -73,9 +72,6 @@ public class BalanceController extends HttpServlet {
 					totalBalance += v.getBalance();
 				}
 				userList.add(0, new User(-1, "合計", family.getId(), false, totalBalance));
-				for (User v : userList) {
-					System.out.println(v.getName() + " : " + v.getBalance());
-				}
 				session.setAttribute("user", user);
 				session.setAttribute("userList", userList);
 				request.getRequestDispatcher(request.getContextPath()+"/balance.jsp")

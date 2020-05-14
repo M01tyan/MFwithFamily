@@ -250,7 +250,7 @@ button:focus {
 						class="mdl-navigation__link mdl-typography--text-uppercase"
 						href="${pageContext.request.contextPath}/share">家族追加</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
-						href="">連携口座</a> <a
+						href="${pageContext.request.contextPath}/financial">連携口座</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
 						href="">マイメニュー</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
@@ -566,12 +566,12 @@ button:focus {
 				memo: memo.value,
 				id: id
 		    };
-			console.log(data);
 			if (data.isTransfer == true && data.financial == data.transfer) {
 				alert("振込元の口座と振込先の口座が同じです");
 			} else if (data.price.length == 0) {
 				alert("金額を入力してください");
 			} else {
+				progressBar.style.cssText = "display: block;";
 				$.ajax({
 					type    : "POST",
 				    url     : path[0],
@@ -588,9 +588,7 @@ button:focus {
 				    }
 				});
 			}
-		})
-
-
+		});
 	</script>
 </body>
 </html>
