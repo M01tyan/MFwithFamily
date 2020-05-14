@@ -203,10 +203,10 @@ public class HouseholdController extends HttpServlet {
 		try (
 			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
-			conn.prepareStatement("SELECT financial.id AS id, users.id AS user_id, users.name AS user_name, financial.name AS financial_name, balance "
-					+ "FROM users "
-					+ "INNER JOIN financial ON users.id = financial.user_id "
-					+ "WHERE users.id = ?;");
+			conn.prepareStatement("SELECT financial.id AS id, users.id AS user_id, users.name AS user_name, financial.name AS financial_name, balance " +
+					"FROM users " +
+					"INNER JOIN financial ON users.id = financial.user_id " +
+					"WHERE users.id = ? AND financial.target = true;");
 		) {
 			ps.setInt(1, uid);
 			ResultSet rs = ps.executeQuery();

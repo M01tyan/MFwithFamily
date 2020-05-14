@@ -79,6 +79,19 @@ public class FinancialController extends HttpServlet {
 		response.sendRedirect(request.getContextPath()+"/financial?id="+id);
 	}
 
+	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		HttpSession session = request.getSession();
+		List<Financial> financialList = (List<Financial>) session.getAttribute("financialList");
+		int id = Integer.parseInt(request.getParameter("index"));
+		try {
+			int financialId = financialList.get(id).getId();
+			deleteFinancial(financialId);
+		} catch (ClassNotFoundException | SQLException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+	}
+
 
 	private List<Financial> getPersonalFinancial(int uid) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
@@ -92,7 +105,7 @@ public class FinancialController extends HttpServlet {
 			conn.prepareStatement("SELECT financial.id AS id, users.id AS user_id, users.name AS user_name, financial.name AS financial_name, balance "
 					+ "FROM users "
 					+ "INNER JOIN financial ON users.id = financial.user_id "
-					+ "WHERE users.id = ?;");
+					+ "WHERE users.id = ? AND financial.target = true;");
 		) {
 			ps.setInt(1, uid);
 			ResultSet rs = ps.executeQuery();
@@ -118,7 +131,7 @@ public class FinancialController extends HttpServlet {
 			conn.prepareStatement("SELECT financial.id AS id, users.id AS user_id, users.name AS user_name, financial.name AS financial_name, balance "
 					+ "FROM users "
 					+ "INNER JOIN financial ON users.id = financial.user_id "
-					+ "WHERE users.family_id = ?;");
+					+ "WHERE users.family_id = ? AND financial.target = true;");
 		) {
 			ps.setInt(1, familyId);
 			ResultSet rs = ps.executeQuery();
@@ -143,11 +156,26 @@ public class FinancialController extends HttpServlet {
 							+ "(`name`, `balance`, `user_id`, `publish`) "
 							+ "VALUES (?, ?, ?, ?);");
 		) {
-
 			ps.setString(1, name);
 			ps.setInt(2, balance);
 			ps.setInt(3, uid);
 			ps.setBoolean(4, publish);
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
+		}
+	}
+
+	private void deleteFinancial(int financialId) throws ClassNotFoundException, SQLException {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
+		try (
+			Connection conn = DriverManager.getConnection(url, user, password);
+			PreparedStatement ps = conn.prepareStatement("UPDATE financial SET target = false WHERE id = ?;");
+		) {
+			ps.setInt(1, financialId);
 			ps.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);

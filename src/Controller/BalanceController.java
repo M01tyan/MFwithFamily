@@ -130,7 +130,7 @@ public class BalanceController extends HttpServlet {
 		String dbPassword = System.getenv("HEROKU_DB_PASSWORD");
 		try (
 			Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
-			PreparedStatement ps = conn.prepareStatement("SELECT SUM(balance) AS balance FROM financial WHERE user_id = ?");
+			PreparedStatement ps = conn.prepareStatement("SELECT SUM(balance) AS balance FROM financial WHERE user_id = ? AND target = true");
 		) {
 			ps.setInt(1, user.getId());
 			ResultSet rs = ps.executeQuery();
@@ -155,7 +155,7 @@ public class BalanceController extends HttpServlet {
 			PreparedStatement ps = conn.prepareStatement("SELECT SUM(balance) AS balance, users.id, users.name "
 					+ "FROM financial "
 					+ "RIGHT JOIN users ON users.id = financial.user_id "
-					+ "WHERE users.family_id = ? "
+					+ "WHERE users.family_id = ? AND target = true "
 					+ "GROUP BY user_id;");
 		) {
 			ps.setLong(1, familyId);

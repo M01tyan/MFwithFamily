@@ -1,9 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"
-    import="model.Financial"
-    import="model.User"
-    import="java.util.*"
-%>
+	pageEncoding="UTF-8" import="model.Financial" import="model.User"
+	import="java.util.*"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,6 +10,7 @@
 	href="https://code.getmdl.io/1.3.0/material.orange-pink.min.css" />
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
 	rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="dist/dialog-polyfill.css" />
 <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <meta charset="UTF-8">
@@ -221,10 +219,12 @@ table {
 button:focus {
 	outline: 0;
 }
+
 .financial-container {
 	width: 81%;
 	text-align: center;
 }
+
 .financial {
 	background-color: #6AB8FF;
 	border-radius: 10px;
@@ -232,6 +232,7 @@ button:focus {
 	min-height: 100px;
 	max-width: 322px;
 }
+
 .financial__balance {
 	color: #FFFFFF;
 	font-size: 35px;
@@ -239,6 +240,7 @@ button:focus {
 	bottom: 0px;
 	right: 30px;
 }
+
 .financial__name {
 	color: #FFFFFF;
 	font-size: 25px;
@@ -246,36 +248,36 @@ button:focus {
 	top: 15px;
 	left: 20px;
 }
+
 .financial__user {
 	position: absolute;
 	bottom: 0px;
 	left: 20px;
 	color: #FFFFFF;
 }
+
 .delete-button {
 	position: absolute;
-    right: 10px;
-    top: 5px;
-    font-size: 15px;
-    background: grey;
-    color: white;
-    transform: rotate(-45deg);
+	right: 10px;
+	top: 5px;
+	font-size: 15px;
+	background: grey;
+	color: white;
+	transform: rotate(-45deg);
 }
+
 .delete-button:hover {
 	background: red;
 }
+
 .financial-form {
 	width: 322px;
-    height: 200px;
-    background: white;
-    margin: auto;
-    border: solid 1px;
-    border-radius: 10px;
-    padding: 20px;
-    position: absolute;
-    bottom: 200px;
-    left: 0;
-    right: 0;
+	height: 200px;
+	background: white;
+	margin: auto;
+	border: solid 1px;
+	border-radius: 10px;
+	padding: 20px;
 }
 </style>
 </head>
@@ -319,44 +321,77 @@ button:focus {
 	int id = Integer.parseInt(request.getParameter("id"));
 	%>
 	<div class="mdl-grid financial-container">
-		<% for (Financial financial : financialList) { %>
-			<div class="mdl-cell mdl-cell--4-col financial">
-				<p class="financial__balance">¥<%= financial.getBalance() %></p>
-				<p class="financial__name"><%= financial.getFinancialName() %></p>
-				<% if (user.getId() == financial.getUid()) {%>
-				<button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab delete-button">
-					<i class="material-icons">add</i>
-				</button>
-				<% } %>
-				<p class="financial__user"><%= financial.getUserName() %></p>
-			</div>
-		<% } %>
+		<%
+			for (Financial financial : financialList) {
+		%>
+		<div class="mdl-cell mdl-cell--4-col financial">
+			<p class="financial__balance">
+				¥<%=financial.getBalance()%></p>
+			<p class="financial__name"><%=financial.getFinancialName()%></p>
+			<%
+				if (user.getId() == financial.getUid()) {
+			%>
+			<button
+				class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab delete-button">
+				<i class="material-icons">add</i>
+			</button>
+			<%
+				}
+			%>
+			<p class="financial__user"><%=financial.getUserName()%></p>
+		</div>
+		<%
+			}
+		%>
 	</div>
-	<% if (user.getId() == financialList.get(0).getUid() || id == 0) { %>
+	<%
+		if (user.getId() == financialList.get(0).getUid() || id == 0) {
+	%>
 	<div class="financial-form">
 		<form action="financial" method="post" id="form">
-			<input type="hidden" name="id" value="<%= request.getParameter("id") %>">
-			<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-		    	<input class="mdl-textfield__input" type="text" id="name" name="name">
-		    	<label class="mdl-textfield__label" for="name">口座名</label>
-		  	</div>
-		  	<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-		  		<div style="display: flex; flex-direction: row;">
-		  			<p style="font-size: 30px; margin: auto;">¥</p>
-			    	<input class="mdl-textfield__input" type="number" id="balance" name="balance" style="text-align: right;">
-			    	<label class="mdl-textfield__label" for="balance" style="padding-left: 20px; width: 95%;">残高</label>
-		    	</div>
-		  	</div>
-		  	<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="secret" style="width: auto; margin-bottom: 10px;">
-			  	<input type="checkbox" id="secret" class="mdl-checkbox__input" name="publish" checked>
-			 	<span class="mdl-checkbox__label">家族全員に公開します</span>
-			</label><BR>
-		  	<input class="mdl-button mdl-js-button mdl-js-ripple-effect button" type="submit" value="送信" id="submit-button" style="margin: auto;">
+			<input type="hidden" name="id"
+				value="<%=request.getParameter("id")%>">
+			<div
+				class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+				<input class="mdl-textfield__input" type="text" id="name"
+					name="name"> <label class="mdl-textfield__label" for="name">口座名</label>
+			</div>
+			<div
+				class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+				<div style="display: flex; flex-direction: row;">
+					<p style="font-size: 30px; margin: auto;">¥</p>
+					<input class="mdl-textfield__input" type="number" id="balance"
+						name="balance" style="text-align: right;"> <label
+						class="mdl-textfield__label" for="balance"
+						style="padding-left: 20px; width: 95%;">残高</label>
+				</div>
+			</div>
+			<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect"
+				for="secret" style="width: auto; margin-bottom: 10px;"> <input
+				type="checkbox" id="secret" class="mdl-checkbox__input"
+				name="publish" checked> <span class="mdl-checkbox__label">家族全員に公開します</span>
+			</label><BR> <input
+				class="mdl-button mdl-js-button mdl-js-ripple-effect button"
+				type="submit" value="送信" id="submit-button" style="margin: auto;">
 		</form>
 	</div>
-	<% } %>
+	<%
+		}
+	%>
+
+	<dialog class="mdl-dialog" style="width: 50%;">
+	<h4 class="mdl-dialog__title">この口座を削除しますか？</h4>
+	<div class="mdl-dialog__content">
+		<p>一度削除すると復元することはできません。</p>
+	</div>
+	<div class="mdl-dialog__actions">
+		<button type="button" class="mdl-button" id="yes-button">はい</button>
+		<button type="button" class="mdl-button close">いいえ</button>
+	</div>
+	</dialog>
 
 	<script>
+		//戻るボタンを押した時にローディング表示
 		const navigationButton = document.querySelectorAll("a");
 		const progressBar = document.getElementById("progress-bar");
 		navigationButton.forEach(button => {
@@ -365,10 +400,45 @@ button:focus {
 			});
 		});
 
+		//submit時のローディング表示
 		const form = document.getElementById("form");
 		form.addEventListener('submit', () => {
 			progressBar.style.cssText = "display: block;";
 		});
+
+		//ダイアログ
+		const dialog = document.querySelector('dialog');
+	    const deleteButtons = document.getElementsByClassName("delete-button");
+	    if (!dialog.showModal) {
+	      dialogPolyfill.registerDialog(dialog);
+	    }
+	    Array.from(deleteButtons).forEach(button => {
+	    	button.addEventListener('click', () => {
+	    		index = [].slice.call(deleteButtons).indexOf(button);
+		      	dialog.showModal();
+		      	//はいボタンを押した時
+		      	document.getElementById("yes-button").addEventListener('click', event => {
+		      		const path = window.location.href.split("?");
+		      		$.ajax({
+						type    : "DELETE",
+					    url     : path[0]+'?index='+index,
+					    async   : true,
+					    success : function(data) {
+					    	console.log("SUCCESS!");
+					    	alert("送信に成功しました！");
+					    	location.reload();
+					    	progressBar.style.cssText = "display: block;";
+					    },
+					    error : function(XMLHttpRequest, textStatus, errorThrown) {
+					      alert("リクエスト時になんらかのエラーが発生しました：" + textStatus +":\n" + errorThrown);
+					    }
+					});
+		      	});
+		    });
+	    });
+	    dialog.querySelector('.close').addEventListener('click', () => {
+	      dialog.close();
+	    });
 	</script>
 </body>
 </html>
