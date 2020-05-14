@@ -6,14 +6,16 @@ public class Financial {
 	private String userName;
 	private int uid;
 	private int balance;
+	private boolean publish;
 
 	public Financial() {}
-	public Financial(int id, String financialName, String userName, int uid, int balance) {
+	public Financial(int id, String financialName, String userName, int uid, int balance, boolean publish) {
 		this.id = id;
 		this.financialName = financialName;
 		this.userName = userName;
 		this.uid = uid;
 		this.balance = balance;
+		this.publish = publish;
 	}
 
 	public void setId(int id) {
@@ -45,6 +47,12 @@ public class Financial {
 	}
 	public int getBalance() {
 		return this.balance;
+	}
+	public void setPublish(boolean publish) {
+		this.publish = publish;
+	}
+	public boolean getPublish() {
+		return this.publish;
 	}
 }
 

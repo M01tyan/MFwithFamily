@@ -302,7 +302,7 @@ button:focus {
 						class="mdl-navigation__link mdl-typography--text-uppercase"
 						href="${pageContext.request.contextPath}/share">家族追加</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
-						href="${pageContext.request.contextPath}/financial">連携口座</a> <a
+						href="${pageContext.request.contextPath}/household">家計簿</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
 						href="">マイメニュー</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
@@ -322,7 +322,8 @@ button:focus {
 	%>
 	<div class="mdl-grid financial-container">
 		<%
-			for (Financial financial : financialList) {
+		for (Financial financial : financialList) {
+			if (financial.getPublish()) {
 		%>
 		<div class="mdl-cell mdl-cell--4-col financial">
 			<p class="financial__balance">
@@ -340,8 +341,33 @@ button:focus {
 			%>
 			<p class="financial__user"><%=financial.getUserName()%></p>
 		</div>
+		<%	}
+		}
+		%>
+	</div>
+	<div class="mdl-grid financial-container">
 		<%
-			}
+		for (Financial financial : financialList) {
+			if (!financial.getPublish() && financial.getUid() == user.getId()) {
+		%>
+		<div class="mdl-cell mdl-cell--4-col financial" style="background: #FE748D">
+			<p class="financial__balance">
+				¥<%=financial.getBalance()%></p>
+			<p class="financial__name"><%=financial.getFinancialName()%></p>
+			<%
+				if (user.getId() == financial.getUid()) {
+			%>
+			<button
+				class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab delete-button">
+				<i class="material-icons">add</i>
+			</button>
+			<%
+				}
+			%>
+			<p class="financial__user"><%=financial.getUserName()%></p>
+		</div>
+		<%	}
+		}
 		%>
 	</div>
 	<%

@@ -169,7 +169,7 @@ h1 {
             	<nav class="android-navigation mdl-navigation">
               		<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/balance">残高</a>
               		<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/share">家族追加</a>
-		           	<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/financial?id=1">連携口座</a>
+		           	<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/household">家計簿</a>
 		          	<a class="mdl-navigation__link mdl-typography--text-uppercase" href="">マイメニュー</a>
 		        	<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/balance?mode=logout">ログアウト</a>
             	</nav>

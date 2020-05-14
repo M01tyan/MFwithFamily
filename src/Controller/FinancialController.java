@@ -102,7 +102,7 @@ public class FinancialController extends HttpServlet {
 		try (
 			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
-			conn.prepareStatement("SELECT financial.id AS id, users.id AS user_id, users.name AS user_name, financial.name AS financial_name, balance "
+			conn.prepareStatement("SELECT financial.id AS id, users.id AS user_id, users.name AS user_name, financial.name AS financial_name, balance, publish "
 					+ "FROM users "
 					+ "INNER JOIN financial ON users.id = financial.user_id "
 					+ "WHERE users.id = ? AND financial.target = true;");
@@ -111,7 +111,7 @@ public class FinancialController extends HttpServlet {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				String user_name = rs.getInt("user_id") == uid ? "あなた" : rs.getString("user_name");
-				financial.add(new Financial(rs.getInt("id"), rs.getString("financial_name"), user_name, rs.getInt("user_id"), rs.getInt("balance")));
+				financial.add(new Financial(rs.getInt("id"), rs.getString("financial_name"), user_name, rs.getInt("user_id"), rs.getInt("balance"), rs.getBoolean("publish")));
 			}
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);
@@ -128,7 +128,7 @@ public class FinancialController extends HttpServlet {
 		try (
 			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
-			conn.prepareStatement("SELECT financial.id AS id, users.id AS user_id, users.name AS user_name, financial.name AS financial_name, balance "
+			conn.prepareStatement("SELECT financial.id AS id, users.id AS user_id, users.name AS user_name, financial.name AS financial_name, balance, publish "
 					+ "FROM users "
 					+ "INNER JOIN financial ON users.id = financial.user_id "
 					+ "WHERE users.family_id = ? AND financial.target = true;");
@@ -137,7 +137,7 @@ public class FinancialController extends HttpServlet {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				String user_name = rs.getInt("user_id") == uid ? "あなた" : rs.getString("user_name");
-				financial.add(new Financial(rs.getInt("id"), rs.getString("financial_name"), user_name, rs.getInt("user_id"), rs.getInt("balance")));
+				financial.add(new Financial(rs.getInt("id"), rs.getString("financial_name"), user_name, rs.getInt("user_id"), rs.getInt("balance"), rs.getBoolean("publish")));
 			}
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);

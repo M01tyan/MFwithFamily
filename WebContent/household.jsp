@@ -250,7 +250,7 @@ button:focus {
 						class="mdl-navigation__link mdl-typography--text-uppercase"
 						href="${pageContext.request.contextPath}/share">家族追加</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
-						href="${pageContext.request.contextPath}/financial">連携口座</a> <a
+						href="${pageContext.request.contextPath}/household">家計簿</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
 						href="">マイメニュー</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"

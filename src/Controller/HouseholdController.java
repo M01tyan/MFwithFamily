@@ -203,7 +203,7 @@ public class HouseholdController extends HttpServlet {
 		try (
 			Connection conn = DriverManager.getConnection(url, user, password);
 			PreparedStatement ps =
-			conn.prepareStatement("SELECT financial.id AS id, users.id AS user_id, users.name AS user_name, financial.name AS financial_name, balance " +
+			conn.prepareStatement("SELECT financial.id AS id, users.id AS user_id, users.name AS user_name, financial.name AS financial_name, balance, publish " +
 					"FROM users " +
 					"INNER JOIN financial ON users.id = financial.user_id " +
 					"WHERE users.id = ? AND financial.target = true;");
@@ -212,7 +212,7 @@ public class HouseholdController extends HttpServlet {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				String user_name = rs.getInt("user_id") == uid ? "あなた" : rs.getString("user_name");
-				financial.add(new Financial(rs.getInt("id"), rs.getString("financial_name"), user_name, rs.getInt("user_id"), rs.getInt("balance")));
+				financial.add(new Financial(rs.getInt("id"), rs.getString("financial_name"), user_name, rs.getInt("user_id"), rs.getInt("balance"), rs.getBoolean("publish")));
 			}
 		} catch (SQLException e) {
 			System.out.println("SQL ERROR: " + e);
@@ -225,51 +225,6 @@ public class HouseholdController extends HttpServlet {
 			if (financial.getFinancialName().equals(financialName)) return financial.getId();
 		}
 		return -1;
-	}
-
-	private void addHousehold(String date, String content, int price, int financialId, String largeItem, String middleItem, String memo, boolean isTransfer, String id, int uid) throws ClassNotFoundException, SQLException {
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
-		String user = System.getenv("HEROKU_DB_USER");
-		String password = System.getenv("HEROKU_DB_PASSWORD");
-		try (
-			Connection conn = DriverManager.getConnection(url, user, password);
-			PreparedStatement ps =
-					conn.prepareStatement("INSERT INTO household "
-							+ "(`date`, `content`, `price`, `financial_id`, `large_item`, `middle_item`, `memo`, `transfer`, `id`, `user_id`) "
-							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
-		) {
-			ps.setString(1, date);
-			ps.setString(2, content);
-			ps.setInt(3, price);
-			ps.setInt(4, financialId);
-			ps.setString(5, largeItem);
-			ps.setString(6, middleItem);
-			ps.setString(7, memo);
-			ps.setBoolean(8, isTransfer);
-			ps.setString(9, id);
-			ps.setInt(10, uid);
-			ps.executeUpdate();
-		} catch (SQLException e) {
-			System.out.println("SQL ERROR: " + e);
-		}
-	}
-
-	private void changeBalance(int financialId, int price) throws ClassNotFoundException, SQLException {
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
-		String user = System.getenv("HEROKU_DB_USER");
-		String password = System.getenv("HEROKU_DB_PASSWORD");
-		try (
-			Connection conn = DriverManager.getConnection(url, user, password);
-			PreparedStatement ps = conn.prepareStatement("UPDATE financial SET balance = balance + ? WHERE id = ?");
-		) {
-			ps.setInt(1, price);
-			ps.setInt(2, financialId);
-			ps.executeUpdate();
-		} catch (SQLException e) {
-			System.out.println("SQL ERROR: " + e);
-		}
 	}
 
 	private String createId() {
