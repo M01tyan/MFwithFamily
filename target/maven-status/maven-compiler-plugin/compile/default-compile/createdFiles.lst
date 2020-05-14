@@ -6,7 +6,9 @@ Controller/Authentication.class
 Controller/BreakdownController.class
 Controller/HouseholdController.class
 Controller/ShareController.class
+Controller/FinancialController.class
 Controller/SignUp.class
+model/Financial.class
 Controller/Login.class
 model/User.class
 Controller/BalanceController.class

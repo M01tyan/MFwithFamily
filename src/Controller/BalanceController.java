@@ -56,7 +56,6 @@ public class BalanceController extends HttpServlet {
 			HttpSession session = request.getSession();
 			User user = (User) session.getAttribute("user");
 			Family family = (Family) session.getAttribute("family");
-			System.out.println("<HOME画面>\nuid: " + user.getId() + " name: " + user.getName() + " familyId: " + family.getId());
 			if (user.getId() == -1) {
 				//ログイン画面へ遷移
 				response.sendRedirect(request.getContextPath() + "/");
@@ -72,10 +71,7 @@ public class BalanceController extends HttpServlet {
 				for (User v : userList) {
 					totalBalance += v.getBalance();
 				}
-				userList.add(0, new User(-1, "合計", -1, family.getId(), false, totalBalance));
-				for (User v : userList) {
-					System.out.println(v.getName() + " : " + v.getBalance());
-				}
+				userList.add(0, new User(-1, "合計", family.getId(), false, totalBalance));
 				session.setAttribute("user", user);
 				session.setAttribute("userList", userList);
 				request.getRequestDispatcher(request.getContextPath()+"/balance.jsp")
@@ -112,13 +108,12 @@ public class BalanceController extends HttpServlet {
 		String dbPassword = System.getenv("HEROKU_DB_PASSWORD");
 		try (
 			Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
-			PreparedStatement ps = conn.prepareStatement("SELECT name, family_id, relationship_id FROM users WHERE id = ?");
+			PreparedStatement ps = conn.prepareStatement("SELECT name, family_id FROM users WHERE id = ?");
 		) {
 			ps.setInt(1, user.getId());
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
 				user.setName(rs.getString("name"));
-				user.setRelationshipId(rs.getInt("relationship_id"));
 				user.setFamilyId(rs.getInt("family_id"));
 			}
 			return user;
@@ -135,7 +130,7 @@ public class BalanceController extends HttpServlet {
 		String dbPassword = System.getenv("HEROKU_DB_PASSWORD");
 		try (
 			Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
-			PreparedStatement ps = conn.prepareStatement("SELECT SUM(price) AS balance FROM household WHERE user_id = ?");
+			PreparedStatement ps = conn.prepareStatement("SELECT SUM(balance) AS balance FROM financial WHERE user_id = ? AND target = true AND publish = true;");
 		) {
 			ps.setInt(1, user.getId());
 			ResultSet rs = ps.executeQuery();
@@ -157,10 +152,10 @@ public class BalanceController extends HttpServlet {
 		List<User> balanceList = new ArrayList<User>();
 		try (
 			Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
-			PreparedStatement ps = conn.prepareStatement("SELECT COALESCE(SUM(price), 0) AS balance, users.id AS id, name "
-					+ "FROM household "
-					+ "RIGHT JOIN users ON users.id = household.user_id "
-					+ "WHERE users.family_id = ? "
+			PreparedStatement ps = conn.prepareStatement("SELECT SUM(balance) AS balance, users.id, users.name "
+					+ "FROM financial "
+					+ "RIGHT JOIN users ON users.id = financial.user_id "
+					+ "WHERE users.family_id = ? AND target = true AND publish = true "
 					+ "GROUP BY user_id;");
 		) {
 			ps.setLong(1, familyId);

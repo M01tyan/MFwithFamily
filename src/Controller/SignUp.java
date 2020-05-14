@@ -66,6 +66,10 @@ public class SignUp extends HttpServlet {
 					request.setAttribute("message", message);
 					request.getRequestDispatcher(request.getContextPath()+"/signUp.jsp").forward(request, response);
 				} else {
+					int id = -1;
+					do {
+						id = createFinancial(user.getId());
+					} while(id == -1);
 					HttpSession session = request.getSession();
 					session.setAttribute("user", user);
 					session.setAttribute("sessionAuthCode", authCode);
@@ -133,5 +137,31 @@ public class SignUp extends HttpServlet {
 			System.out.println("SQL ERROR: " + e);
 		}
 		return user;
+	}
+
+	private int createFinancial(int uid) throws SQLException, ClassNotFoundException {
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String DBUser = System.getenv("HEROKU_DB_USER");
+		String DBPassword = System.getenv("HEROKU_DB_PASSWORD");
+		int id = -1;
+		try (
+			Connection conn = DriverManager.getConnection(url, DBUser, DBPassword);
+			PreparedStatement ps =
+					conn.prepareStatement("INSERT INTO financial "
+							+ "(`name`, `user_id`) "
+							+ "VALUES (?, ?);", Statement.RETURN_GENERATED_KEYS);
+		) {
+			ps.setString(1, "お財布");
+			ps.setInt(2, uid);
+			ps.executeUpdate();
+			ResultSet res = ps.getGeneratedKeys();
+			if(res.next()) {
+				id = res.getInt(1);
+			}
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
+		}
+		return id;
 	}
 }

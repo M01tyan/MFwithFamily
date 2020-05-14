@@ -1,7 +1,6 @@
 package model;
 
 public class Household {
-	private int target;
 	private String date;
 	private String content;
 	private int price;
@@ -9,20 +8,26 @@ public class Household {
 	private String largeItem;
 	private String middleItem;
 	private String memo;
-	private int transfer;
+	private boolean transfer;
 	private String id;
 	private String userName;
-	private String relationshipName;
 
-	public void setTarget(int target) {
-		this.target = target;
-	}
-	public int getTarget() {
-		return this.target;
+	public Household() {}
+
+	public Household(String date, String content, int price, String financial, String largeItem, String middleItem, String memo, boolean transfer, String id, String userName) {
+		this.date = date;
+		this.content = content;
+		this.price = price;
+		this.financial = financial;
+		this.largeItem = largeItem;
+		this.middleItem = middleItem;
+		this.memo = memo;
+		this.transfer = transfer;
+		this.id = id;
+		this.userName = userName;
 	}
 
 	public void setDate(String date) {
-//		System.out.println(date);
 		this.date = date;
 	}
 	public String getDate() {
@@ -71,10 +76,10 @@ public class Household {
 		return this.memo;
 	}
 
-	public void setTransfer(int transfer) {
+	public void setTransfer(boolean transfer) {
 		this.transfer = transfer;
 	}
-	public int getTransfer() {
+	public boolean getTransfer() {
 		return this.transfer;
 	}
 
@@ -92,10 +97,4 @@ public class Household {
 		return this.userName;
 	}
 
-	public void setRelationshipName(String relationshipName) {
-		this.relationshipName = relationshipName;
-	}
-	public String getRelationshipName() {
-		return this.relationshipName;
-	}
 }

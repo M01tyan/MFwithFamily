@@ -29,6 +29,10 @@
   	<servlet-name>Share</servlet-name>
   	<servlet-class>Controller.ShareController</servlet-class>
   </servlet>
+  <servlet>
+  	<servlet-name>Financial</servlet-name>
+  	<servlet-class>Controller.FinancialController</servlet-class>
+  </servlet>
   <servlet-mapping>
   	<servlet-name>BalanceController</servlet-name>
   	<url-pattern>/balance</url-pattern>
@@ -56,5 +60,9 @@
   <servlet-mapping>
   	<servlet-name>Share</servlet-name>
   	<url-pattern>/share</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+  	<servlet-name>Financial</servlet-name>
+  	<url-pattern>/financial</url-pattern>
   </servlet-mapping>
 </web-app>

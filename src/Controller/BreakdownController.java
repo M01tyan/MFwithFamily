@@ -67,12 +67,10 @@ public class BreakdownController extends HttpServlet {
 			PreparedStatement ps =
 			conn.prepareStatement("(SELECT SUM(price) AS price, large_item, \"合計\" AS payer "
 					+ "FROM household INNER JOIN users ON users.id = household.user_id "
-					+ "INNER JOIN relationship ON users.relationship_id = relationship.id "
 					+ "GROUP BY large_item HAVING price < 0) "
 					+ "UNION ALL "
 					+ "(SELECT SUM(price) AS price, large_item, users.name AS payer FROM household "
 					+ "INNER JOIN users ON users.id = household.user_id "
-					+ "INNER JOIN relationship ON users.relationship_id = relationship.id "
 					+ "GROUP BY large_item, users.id HAVING price < 0) "
 					+ "ORDER BY large_item DESC, price ASC");
 		) {
@@ -100,7 +98,6 @@ public class BreakdownController extends HttpServlet {
 			PreparedStatement ps =
 			conn.prepareStatement("SELECT SUM(price) AS price, large_item, users.name AS payer FROM household "
 					+ "INNER JOIN users ON users.id = household.user_id "
-					+ "INNER JOIN relationship ON users.relationship_id = relationship.id "
 					+ "WHERE users.id = " + id + " "
 					+ "GROUP BY large_item, users.id HAVING price < 0 "
 					+ "ORDER BY large_item DESC, price ASC");
