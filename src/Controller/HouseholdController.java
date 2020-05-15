@@ -287,7 +287,8 @@ public class HouseholdController extends HttpServlet {
 					+ "FROM household "
 					+ "JOIN users ON users.id = household.user_id "
 					+ "JOIN financial ON financial.id = household.financial_id "
-					+ "WHERE users.family_id = ?;");
+					+ "WHERE users.family_id = ? "
+					+ "ORDER BY date DESC;");
 		) {
 			ps.setInt(1, familyId);
 			ResultSet rs = ps.executeQuery();
@@ -311,52 +312,4 @@ public class HouseholdController extends HttpServlet {
 		}
 		return list;
 	}
-
-	private List<Household> fetchEachHousehold(int uid) throws ClassNotFoundException, SQLException {
-		List<Household> list = new ArrayList<Household>();
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL");
-		String user = System.getenv("HEROKU_DB_USER");
-		String password = System.getenv("HEROKU_DB_PASSWORD");
-		try (
-			Connection conn = DriverManager.getConnection(url, user, password);
-			PreparedStatement ps =
-			conn.prepareStatement("SELECT "
-					+ "date, "
-					+ "content, "
-					+ "price, "
-					+ "financial.name AS financial, "
-					+ "large_item, "
-					+ "middle_item, "
-					+ "memo, "
-					+ "transfer, "
-					+ "household.id AS id, "
-					+ "users.name AS user_name "
-					+ "FROM household "
-					+ "INNER JOIN users ON household.user_id = users.id "
-					+ "INNER JOIN financial ON household.financial_id = financial.id "
-					+ "WHERE users.id = ?;");
-		) {
-			ps.setInt(1, uid);
-			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				Household household = new Household();
-				household.setDate(rs.getString("date"));
-				household.setContent(rs.getString("content"));
-				household.setPrice(rs.getInt("price"));
-				household.setFinancial(rs.getString("financial"));
-				household.setLargeItem(rs.getString("large_item"));
-				household.setMiddleItem(rs.getString("middle_item"));
-				household.setMemo(rs.getString("memo"));
-				household.setTransfer(rs.getBoolean("transfer"));
-				household.setId(rs.getString("id"));
-				household.setUserName(rs.getString("user_name"));
-				list.add(household);
-			}
-		} catch (SQLException e) {
-			System.out.println("SQL ERROR: " + e);
-		}
-		return list;
-	}
-
 }

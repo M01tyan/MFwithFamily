@@ -226,9 +226,10 @@ button:focus {
 	outline: 0;
 }
 
-.transfer {
-	color: #e0e0e0;
+.is-transfer {
+	color: #e3e3e3;
 }
+
 </style>
 </head>
 <body>
@@ -240,15 +241,18 @@ button:focus {
 	List<User> userList = (List<User>) session.getAttribute("userList");
 	User user = (User) session.getAttribute("user");
 	%>
-	<form name="financial_id_list">
+	<form name="financial_list">
 		<% for (Financial financial : financialList) { %>
 		<input type="hidden" name="id" value="<%= financial.getId() %>">
+		<input type="hidden" name="uid" value="<%= financial.getUid() %>">
+		<input type="hidden" name="name" value="<%= financial.getFinancialName() %>">
+		<input type="hidden" name="userName" value="<%= financial.getUserName() %>">
+		<input type="hidden" name="balance" value="<%= financial.getBalance() %>">
+		<input type="hidden" name="publish" value="<%= financial.getPublish() %>">
 		<% } %>
 	</form>
-	<form name="financial_uid_list">
-		<% for (Financial financial : financialList) { %>
-		<input type="hidden" name="uid" value="<%= financial.getUid() %>">
-		<% } %>
+	<form name="user">
+		<input type="hidden" name="id" value="<%= user.getId() %>">
 	</form>
 	<form name="household_list">
 		<% for (Household household : householdList) { %>
@@ -336,18 +340,18 @@ button:focus {
 						style="height: 44px;" value="あなた　<%=financialList.get(0).getFinancialName()%>">
 					<label class="mdl-textfield__label" for="financial" id="financial-lable">口座</label>
 
-					<ul
-						class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect"
-						for="financial">
+					<ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="financial" id="financial-list">
 						<%
-							for (int i=0; i<financialList.size(); i++) {
+						for (int i=0; i<financialList.size(); i++) {
+							if (financialList.get(i).getPublish()|| user.getId() == financialList.get(i).getUid()) {
 								if (i == 0) {
 						%>
-						<li disabled class="mdl-menu__item financial"><%= financialList.get(i).getUserName() %> <%=financialList.get(i).getFinancialName()%></li>
-						<% } else { %>
-						<li class="mdl-menu__item financial"><%= financialList.get(i).getUserName() %> <%=financialList.get(i).getFinancialName()%></li>
-						<% }
-						} %>
+							<li disabled class="mdl-menu__item financial"><%= financialList.get(i).getUserName() %> <%=financialList.get(i).getFinancialName()%></li>
+							<% 	} else { %>
+							<li class="mdl-menu__item financial"><%= financialList.get(i).getUserName() %> <%=financialList.get(i).getFinancialName()%></li>
+							<%  }
+							}
+						}%>
 					</ul>
 				</div>
 				<div
@@ -372,17 +376,16 @@ button:focus {
 
 					<ul
 						class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect"
-						for="transfer" id="transfer-liset__parent">
+						for="transfer" id="transfer-list">
 						<%
 						for (int i = 0; i < financialList.size(); i++) {
-							if (i == 0) {
+							if (financialList.get(i).getPublish() || user.getId() == financialList.get(i).getUid()) {
+								if (i == 0) {
 						%>
-						<li disabled class="mdl-menu__item transfer"><%= financialList.get(i).getUserName() %> <%=financialList.get(i).getFinancialName()%></li>
-						<%
-							} else {
-						%>
-						<li class="mdl-menu__item transfer"><%= financialList.get(i).getUserName() %> <%=financialList.get(i).getFinancialName()%></li>
-						<%
+							<li disabled class="mdl-menu__item transfer"><%= financialList.get(i).getUserName() %> <%=financialList.get(i).getFinancialName()%></li>
+							 <% } else { %>
+							<li class="mdl-menu__item transfer"><%= financialList.get(i).getUserName() %> <%=financialList.get(i).getFinancialName()%></li>
+						<%      }
 							}
 						}
 						%>
@@ -481,7 +484,7 @@ button:focus {
 			for (Household household : filter) {
 			%>
 
-			<tr class="<%= household.getTransfer() ? "transfer" : ""%>">
+			<tr class="<%= household.getTransfer() ? "is-transfer" : ""%>">
 				<td class="mdl-data-table__cell--non-numeric"><%=household.getDate()%></td>
 				<td class="mdl-data-table__cell--non-numeric"><%=household.getContent()%></td>
 				<td><%=household.getPrice()%></td>
@@ -498,8 +501,18 @@ button:focus {
 		</tbody>
 	</table>
 	<script>
-		const financialIdList = document.financial_id_list.id;
-		const financialUidList = document.financial_uid_list.uid;
+		//jspからデータを取得
+		let financialList = [];
+		for (let i=0; i<document.financial_list.id.length; i++ ){
+			financialList.push({
+				id: document.financial_list.id[i].value,
+				financialName: document.financial_list.name[i].value,
+				userName: document.financial_list.userName[i].value,
+				uid: document.financial_list.uid[i].value,
+				balance: document.financial_list.balance[i].value,
+				publish: document.financial_list.publish[i].value
+			});
+		}
 		let householdList = [];
 		for (let i=0; i<document.household_list.date.length; i++) {
 			householdList.push({
@@ -515,6 +528,9 @@ button:focus {
 				userName: document.household_list.userName[i].value,
 			});
 		}
+		const uid = document.user.id.value;
+
+
 		//本日の日付を初期値
 		let today = new Date();
 		today.setDate(today.getDate());
@@ -542,7 +558,7 @@ button:focus {
 			}
 		});
 
-		//項目選択時の表示切り替え
+		//大項目選択時の表示切り替え
 		const middleItemMap = {
 			"食費": ["食費", "食料品", "外食", "朝ごはん", "昼ごはん", "夜ごはん", "カフェ", "その他食費"],
 			"日用品": ["日用品", "子育て用品", "ドラッグストア", "おこづかい", "ペット用品", "タバコ", "その他日用品"],
@@ -598,18 +614,20 @@ button:focus {
 		const transfers = document.getElementsByClassName("transfer");
 		Array.from(financials).forEach(financial => {
 			financial.addEventListener('click', event => {
-				Array.from(financials).forEach(financial => {
-					financial.removeAttribute("disabled");
-				});
-				const index = [].slice.call(financials).indexOf(financial);
-				financials[index].setAttribute("disabled", "disabled");
-				financialText.value = event.currentTarget.innerText;
-				financialUid.value = financialUidList[index].value;
-				financialId.value = financialIdList[index].value;
-				Array.from(transfers).forEach(transfer => {
-					transfer.removeAttribute("disabled");
-				});
-				transfers[index].setAttribute("disabled", "disabled");
+				if (!event.currentTarget.getAttribute("disabled")) {
+					Array.from(financials).forEach(financial => {
+						financial.removeAttribute("disabled");
+					});
+					const index = [].slice.call(financials).indexOf(financial);
+					financials[index].setAttribute("disabled", "disabled");
+					financialText.value = event.currentTarget.innerText;
+					financialUid.value = financialList[index].uid;
+					financialId.value = financialList[index].id;
+					Array.from(transfers).forEach(transfer => {
+						transfer.removeAttribute("disabled");
+					});
+					transfers[index].setAttribute("disabled", "disabled");
+				}
 			});
 		});
 
@@ -622,8 +640,8 @@ button:focus {
 				const index = [].slice.call(transfers).indexOf(transfer);
 				if (!event.currentTarget.getAttribute("disabled")) {
 					transferText.value = event.currentTarget.innerText;
-					transferUid.value = financialUidList[index].value;
-					transferId.value = financialIdList[index].value;
+					transferUid.value = financialList[index].uid;
+					transferId.value = financialList[index].id;
 				}
 			});
 		});
@@ -668,7 +686,6 @@ button:focus {
 				alert("金額を入力してください");
 			} else {
 				progressBar.style.cssText = "display: block;";
-				console.log(location.href);
 				$.ajax({
 					type    : "POST",
 				    url     : location.href,
@@ -691,20 +708,23 @@ button:focus {
 		//タブの切り替え
 		const tabs = document.getElementsByClassName("mdl-tabs__tab");
 		const householdItems = document.getElementById("household_item");
+		const financialLists = document.getElementById("financial-list");
+		const transferLists = document.getElementById("transfer-list");
 		let targetTabName = "全体";
 		Array.from(tabs).forEach(tab => {
 			tab.addEventListener('click', event => {
 				targetTabName = event.currentTarget.innerText;
-				const result = event.currentTarget.innerText == "全体"
-					? householdList.filter(household => household.date.match(new RegExp("2020-05-.{2}")))
-					: householdList.filter(household => household.userName.toUpperCase() == event.currentTarget.innerText && household.date.match(new RegExp("2020-05-.{2}")));
+				const format = today.getFullYear()+"-"+('0'+(today.getMonth()+1)).slice(-2)+"-.{2}";
+				const householdFilter = targetTabName == "全体"
+					? householdList.filter(household => household.date.match(new RegExp(format)))
+					: householdList.filter(household => household.userName.toUpperCase() == targetTabName && household.date.match(new RegExp(format)));
 				while (householdItems.firstChild) {
 					householdItems.removeChild(householdItems.firstChild);
 				}
-				result.map(household => {
+				householdFilter.map(household => {
 					const tr = document.createElement('tr');
 					for (let [key, value] of Object.entries(household)) {
-						if(key == "transfer" && value == "true") tr.classList.add("transfer");
+						if(key == "transfer" && value == "true") tr.classList.add("is-transfer");
 						if(key == "id" || key == "transfer") continue;
 						const td = document.createElement('td');
 						if (key != "price") td.classList.add("mdl-data-table__cell--non-numeric");
@@ -713,10 +733,69 @@ button:focus {
 					}
 					householdItems.appendChild(tr);
 				});
+				//口座の切り替え
+				while (financialLists.firstChild) {
+					financialLists.removeChild(financialLists.firstChild);
+					transferLists.removeChild(transferLists.firstChild);
+				}
+				const financialFilter = targetTabName == "全体"
+										? financialList
+										: financialList.filter(financial => financial.userName.toUpperCase() == targetTabName );
+				financialFilter.map((financial, index) => {
+					if (financial.publish == "true" || uid == financial.uid) {
+						const financial_li = document.createElement('li');
+						const transfer_li = document.createElement('li');
+						financial_li.classList.add("mdl-menu__item");
+						financial_li.classList.add("financial");
+						transfer_li.classList.add("mdl-menu__item");
+						transfer_li.classList.add("transfer");
+						if (index == 0) {
+							financial_li.setAttribute("disabled", "disabled");
+							financialText.value = financial.userName + " " + financial.financialName;
+							financialUid.value = financial.uid;
+							financialId.value = financial.id;
+							transferText.value = financial.userName + " " + financial.financialName;
+							transferUid.value = financial.uid;
+							transferId.value = financial.id;
+						}
+						financial_li.innerText = financial.userName + " " + financial.financialName;
+						transfer_li.innerText = financial.userName + " " + financial.financialName;
+						financialLists.appendChild(financial_li);
+						transferLists.appendChild(transfer_li);
+					}
+				});
+				Array.from(document.getElementsByClassName("financial")).forEach(financial => {
+					financial.addEventListener('click', event => {
+						if (!event.currentTarget.getAttribute("disabled")) {
+							Array.from(document.getElementsByClassName("financial")).forEach(financial => {
+								financial.removeAttribute("disabled");
+							});
+							const index = [].slice.call(document.getElementsByClassName("financial")).indexOf(financial);
+							document.getElementsByClassName("financial")[index].setAttribute("disabled", "disabled");
+							financialText.value = event.currentTarget.innerText;
+							financialUid.value = financialList[index].uid;
+							financialId.value = financialList[index].id;
+							Array.from(document.getElementsByClassName("transfer")).forEach(transfer => {
+								transfer.removeAttribute("disabled");
+							});
+							document.getElementsByClassName("transfer")[index].setAttribute("disabled", "disabled");
+						}
+					});
+				});
+				Array.from(document.getElementsByClassName("transfer")).forEach(transfer => {
+					transfer.addEventListener('click', event => {
+						const index = [].slice.call(document.getElementsByClassName("transfer")).indexOf(transfer);
+						if (!event.currentTarget.getAttribute("disabled")) {
+							transferText.value = event.currentTarget.innerText;
+							transferUid.value = financialList[index].uid;
+							transferId.value = financialList[index].id;
+						}
+					});
+				});
 			});
 		});
 
-		//
+		//月別フィルター
 		const leftButton = document.getElementById("left-button");
 		const rightButton = document.getElementById("right-button");
 		leftButton.addEventListener('click', event => {
@@ -732,7 +811,7 @@ button:focus {
 			result.map(household => {
 				const tr = document.createElement('tr');
 				for (let [key, value] of Object.entries(household)) {
-					if(key == "transfer" && value == "true") tr.classList.add("transfer");
+					if(key == "transfer" && value == "true") tr.classList.add("is-transfer");
 					if(key == "id" || key == "transfer") continue;
 					const td = document.createElement('td');
 					if (key != "price") td.classList.add("mdl-data-table__cell--non-numeric");
@@ -755,7 +834,7 @@ button:focus {
 			result.map(household => {
 				const tr = document.createElement('tr');
 				for (let [key, value] of Object.entries(household)) {
-					if(key == "transfer" && value == "true") tr.classList.add("transfer");
+					if(key == "transfer" && value == "true") tr.classList.add("is-transfer");
 					if(key == "id" || key == "transfer") continue;
 					const td = document.createElement('td');
 					if (key != "price") td.classList.add("mdl-data-table__cell--non-numeric");
