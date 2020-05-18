@@ -68,8 +68,8 @@ public class FinancialController extends HttpServlet {
 		String name = request.getParameter("name");
 		String id = request.getParameter("id");
 		int balance = Integer.parseInt(request.getParameter("balance"));
-		boolean publish = Boolean.valueOf(request.getParameter(request.getParameter("publish")));
-
+		boolean publish = Boolean.valueOf(request.getParameter("publish"));
+		System.out.println(name + " " + balance + " " + publish);
 		try {
 			addFinancial(name, balance, user.getId(), publish);
 		} catch (ClassNotFoundException | SQLException e) {

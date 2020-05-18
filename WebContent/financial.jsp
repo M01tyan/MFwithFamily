@@ -433,10 +433,9 @@ button:focus {
 						style="padding-left: 20px; width: 95%;">残高</label>
 				</div>
 			</div>
-			<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect"
-				for="secret" style="width: auto; margin-bottom: 10px;"> <input
-				type="checkbox" id="secret" class="mdl-checkbox__input"
-				name="publish" checked> <span class="mdl-checkbox__label">家族全員に公開します</span>
+			<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="secret" style="width: auto; margin-bottom: 10px;">
+			<input type="checkbox" id="secret" class="mdl-checkbox__input" name="publish" value="true" checked>
+			<span class="mdl-checkbox__label">家族全員に公開します</span>
 			</label><BR> <input
 				class="mdl-button mdl-js-button mdl-js-ripple-effect button"
 				type="submit" value="送信" id="submit-button" style="margin: auto;">
@@ -472,6 +471,14 @@ button:focus {
 		const form = document.getElementById("form");
 		form.addEventListener('submit', () => {
 			progressBar.style.cssText = "display: block;";
+		});
+
+		//公開チャックボックスを押した時の処理
+		const checkBox = document.getElementById("secret");
+		let publish = true;
+		checkBox.addEventListener('click', event => {
+			publish = !publish;
+			checkBox.value = publish;
 		});
 
 		//ダイアログ

@@ -3,6 +3,7 @@
     import="model.User"
     import="model.Family"
     import="java.util.*"
+    import="Component.Color"
 %>
 <!DOCTYPE html>
 <html>
@@ -206,10 +207,8 @@ h1 {
 .share-code__input {
 	display: flex;
 	flex-direction: row;
-	justify-content: end;
-	position: absolute;
-	right: 75px;
-	top: 100px;
+	justify-content: center;
+	padding-left: 90px;
 }
 
 .user-chip {
@@ -223,9 +222,14 @@ h1 {
     justify-content: space-around;
     align-items: center;
     position: absolute;
-    left: 385px;
-    top: 220px;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
     transform: scale(2, 2);
+    margin: auto;
+    width: auto;
+    height: 100px;
 }
 </style>
 </head>
@@ -233,8 +237,8 @@ h1 {
 	<div id="progress-bar"
 		class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
 	<div
-		class="android-header mdl-layout__header mdl-layout__header--waterfall">
-		<div class="mdl-layout__header-row">
+		class="android-header mdl-layout__header--waterfall">
+		<div class="mdl-layout__header-row" style="padding: 0 0 0 5px;">
 			<span class="android-title mdl-layout-title">
 				<p style="font-size: 24px; font-weight: bold; margin-top: 20px">
 					Money Forward <span style="color: orange;">with Family</span>
@@ -251,8 +255,6 @@ h1 {
 						href="${pageContext.request.contextPath}/share">家族追加</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
 						href="${pageContext.request.contextPath}/household">家計簿</a> <a
-						class="mdl-navigation__link mdl-typography--text-uppercase"
-						href="">マイメニュー</a> <a
 						class="mdl-navigation__link mdl-typography--text-uppercase"
 						href="${pageContext.request.contextPath}/balance?mode=logout">ログアウト</a>
 				</nav>
@@ -275,16 +277,12 @@ h1 {
 				type="submit" value="おうちを作る" id="submit-button" name="createShareCode" style="margin: auto;">
 		</div>
 	</form>
-	<% } else { %>
-	<h2 style="margin-top: 77px; ">家族コード</h2>
-	<p style="font-size: 40px; color: orange;"><%= family.getShareCode() %></p>
-	<% } %>
-
 	<% String message = (String)request.getAttribute("message"); %>
 	<span style="color: red"><%= message == null ? "" : message %></span>
+	<p style="font-size: 20px; color: orange; margin-top: 60px;">おうちに入る</p>
 	<form name="inputShareCode" action="share" method="post" class="share-code__input">
 		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-	    	<input class="mdl-textfield__input" type="text" id="share-code" name="inputShareCode">
+	    	<input class="mdl-textfield__input" type="text" id="share-code" name="inputShareCode" style="padding-bottom: 20px;">
 	    	<label class="mdl-textfield__label" for="share-code">家族コードの入力</label>
 		</div>
 		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--1-col" style="text-align: left; margin-top: 27px;">
@@ -292,27 +290,35 @@ h1 {
 				type="submit" value="送信" id="submit-button" style="margin: auto;">
 		</div>
 	</form>
+	<% } else { %>
+	<h2 style="margin-top: 77px; ">家族コード</h2>
+	<p style="font-size: 40px; color: orange;"><%= family.getShareCode() %></p>
+	<% } %>
+	<% if (!family.getShareCode().equals("DEFAULT")) {%>
 	<div style="position: relative;">
-		<svg width="1053" height="529" viewBox="0 0 1053 529" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: relative;">
+		<svg width="800" height="529" viewBox="0 0 1053 529" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: relative;">
 			<path d="M524.174 1.42698C525.672 0.852992 527.328 0.852991 528.826 1.42698L946.964 161.681C953.696 164.261 951.848 174.25 944.638 174.25H108.362C101.152 174.25 99.3037 164.261 106.036 161.68L524.174 1.42698Z" fill="white" stroke="black"/>
 			<path d="M134.5 176C134.5 170.753 138.753 166.5 144 166.5H910C915.247 166.5 919.5 170.753 919.5 176V519C919.5 524.247 915.247 528.5 910 528.5H144C138.753 528.5 134.5 524.247 134.5 519V176Z" fill="white" stroke="black"/>
 			<rect x="134" y="156" width="786" height="18" fill="white"/>
 		</svg>
 		<div class="family-list">
-			<% List<User> userList = family.getUserList(); %>
+			<%
+			List<User> userList = family.getUserList();
+			List<Color> colors = new ArrayList(Arrays.asList(Color.values()));
+			Collections.shuffle(colors);
+			%>
 			<% for (int i=0; i<userList.size(); i++) {
 				String userName = userList.get(i).getId() == user.getId() ? "あなた" : userList.get(i).getName();
 			%>
 			<span class="mdl-chip mdl-chip--contact mdl-chip--deletable">
-				<span class="mdl-chip__contact mdl-color--teal mdl-color-text--white">A</span>
+				<span class="mdl-chip__contact mdl-color-text--white" style="background: <%= colors.get(i).getDarkColor() %>;"><%= userList.get(i).getName().substring(0,1) %></span>
 			    <span class="mdl-chip__text"><%= userName %></span>
 			    <button id="<%= userList.get(i).getId() %>" class="mdl-chip__action"><i class="material-icons">cancel</i></button>
 			</span>
 			<% } %>
 		</div>
 	</div>
-
-
+	<% } %>
 	<%-- <div style="display: flex; flex-direction: row">
 		<% if (userList.get(i).getId()==user.getId()) { %>
 		<p>あなた</p>
