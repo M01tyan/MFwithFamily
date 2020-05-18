@@ -1,7 +1,6 @@
 package Component;
 
 public enum Color {
-	Orange("#FAB97D", "#FE8413"),
 	Green("#B3FE85", "#51C20C"),
 	Red("#FF9898", "#ED2828"),
 	Blue("#9FD1FF", "#1773C9"),

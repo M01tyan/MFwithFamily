@@ -157,8 +157,8 @@ h1 {
 </head>
 <body>
 	<div id="progress-bar" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
-	<div class="android-header mdl-layout__header mdl-layout__header--waterfall">
-		<div class="mdl-layout__header-row">
+	<div class="android-header mdl-layout__header--waterfall">
+		<div class="mdl-layout__header-row" style="padding: 0 0 0 5px;">
 			<span class="android-title mdl-layout-title">
 				<p style="font-size: 24px; font-weight: bold; margin-top: 20px">Money Forward <span style="color: orange;">with Family</span></p>
           	</span>
@@ -170,7 +170,6 @@ h1 {
               		<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/balance">残高</a>
               		<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/share">家族追加</a>
 		           	<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/household">家計簿</a>
-		          	<a class="mdl-navigation__link mdl-typography--text-uppercase" href="">マイメニュー</a>
 		        	<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/balance?mode=logout">ログアウト</a>
             	</nav>
           	</div>

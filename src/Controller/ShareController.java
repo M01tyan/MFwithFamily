@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -53,6 +54,8 @@ public class ShareController extends HttpServlet {
 					e.printStackTrace();
 				}
 			}
+			request.getRequestDispatcher(request.getContextPath()+"/share.jsp")
+			   .forward(request, response);
 		} else {
 			String shareCode = "";
 			try {
@@ -63,8 +66,9 @@ public class ShareController extends HttpServlet {
 				} while (!checkUniqueShareCode(shareCode));
 				Family family = createFamily(shareCode);
 				setFamilyId(family.getId(), user.getId());
+				family.setUserList(new ArrayList<User>(Arrays.asList(user)));
 				session.setAttribute("family", family);
-				request.getRequestDispatcher("/share.jsp").forward(request, response);
+				response.sendRedirect(request.getContextPath() + "/share");
 			} catch (ClassNotFoundException | SQLException e) {
 				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
@@ -73,8 +77,6 @@ public class ShareController extends HttpServlet {
 				request.getRequestDispatcher("/share.jsp").forward(request, response);
 			}
 		}
-		request.getRequestDispatcher(request.getContextPath()+"/share.jsp")
-		   .forward(request, response);
 	}
 
 	/**
@@ -99,8 +101,7 @@ public class ShareController extends HttpServlet {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
-		request.getRequestDispatcher(request.getContextPath()+"/share.jsp")
-		   .forward(request, response);
+		response.sendRedirect(request.getContextPath() + "/share");
 	}
 
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -270,9 +271,12 @@ public class ShareController extends HttpServlet {
 							+ "(SELECT family_id, users.id AS id, name, auth_code "
 							+ "FROM users "
 							+ "INNER JOIN family ON users.family_id = family.id "
-							+ "WHERE family_id = @family_id);");
+							+ "WHERE CASE @family_id "
+							+ "WHEN -1 THEN users.id = ? "
+							+ "ELSE family_id = @family_id END);");
 		) {
 			ps.setInt(1, user.getId());
+			ps.setInt(2, user.getId());
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
 				int id = (int) rs.getInt("id");
