@@ -32,6 +32,7 @@ public class Login extends HttpServlet {
 	}
 
 	/**
+	 * ログインフォームを入力した際に呼ばれる
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -39,18 +40,24 @@ public class Login extends HttpServlet {
 		// TODO Auto-generated method stub
 		response.setContentType("text/html; charset=UTF-8");
 		String message = "";
+		// ログインフォームからメールアドレスとパスワードを取得
 		String email = (String) request.getParameter("email");
 		String password = (String) request.getParameter("password");
 		try {
 			HttpSession session = request.getSession();
+			// ログインする
 			User user = login(email, password, request);
 			if (user.getId() != -1) {
-				//メール認証済みかチェック
-				System.out.println("ログインしました！\nuid: " + user.getId() + " name: " + user.getName());
+				// ログインに成功
+				System.out.println("ログインしました！ uid: " + user.getId() + " name: " + user.getName());
+				// セッションにユーザ情報を保存
 				session.setAttribute("user", user);
+
 				if (user.getEmailCertificate() != false) {
+					// メール認証済みなら残高画面へ遷移
 					response.sendRedirect(request.getContextPath() + "/balance");
 				} else {
+					//メール認証をまだ完了していない場合
 					//認証コードの生成＆メール送信 -> 認証画面へ遷移
 					String sessionAuthCode = (String) session.getAttribute("code");
 					if (sessionAuthCode == null) {
@@ -64,10 +71,10 @@ public class Login extends HttpServlet {
 					response.sendRedirect(request.getContextPath() + "/auth");
 				}
 			} else {
+				//ログインに失敗した場合エラーメッセージを表示
 				message += "ログインできませんでした";
 				request.setAttribute("message", message);
 				request.getRequestDispatcher("/login.jsp").forward(request, response);
-				//				response.sendRedirect(request.getContextPath() + "/");
 			}
 		} catch (ClassNotFoundException | SQLException | IOException e) {
 			// TODO 自動生成された catch ブロック
@@ -75,6 +82,16 @@ public class Login extends HttpServlet {
 		}
 	}
 
+	/**
+	 * ログインメソッド
+	 * 生のメールアドレス、生のパスワードからMySQL上のユーザ情報を参照&取得
+	 * @param email 生のメールアドレス
+	 * @param password 生のパスワード
+	 * @param request
+	 * @return ログインするユーザ情報
+	 * @throws SQLException 正しくSQLが実行されなかった場合
+	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
+	 */
 	private User login(String email, String password, HttpServletRequest request)
 			throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
@@ -82,6 +99,7 @@ public class Login extends HttpServlet {
 				+ "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String DBuser = System.getenv("HEROKU_DB_USER");
 		String DBpassword = System.getenv("HEROKU_DB_PASSWORD");
+		// 暗号鍵を取得
 		String secretKey = System.getenv("SECRET_KEY");
 		User user = new User();
 		Family family = new Family();
