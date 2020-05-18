@@ -16,8 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
-
 import Component.SendMail;
 import model.Family;
 import model.User;
@@ -54,12 +52,9 @@ public class SignUp extends HttpServlet {
 			SendMail sendMail = new SendMail();
 			String authCode = "";
 			try {
-				authCode = sendMail.send(email);
-			} catch (UnirestException e1) {
-				// TODO 自動生成された catch ブロック
-				e1.printStackTrace();
-			}
-			try {
+				StringBuffer path = request.getRequestURL();
+				String[] url = path.toString().split("/");
+				authCode = sendMail.send(email, url[2]);
 				User user = createUser(email, password, name);
 				if (user.getId() == -1) {
 					message += "もうすでに登録されたメールアドレスです";
@@ -77,7 +72,7 @@ public class SignUp extends HttpServlet {
 					System.out.println("認証コード: " + authCode);
 					response.sendRedirect(request.getContextPath()+"/auth");
 				}
-			} catch (ClassNotFoundException | SQLException e) {
+			} catch (ClassNotFoundException | SQLException | IOException e) {
 				e.printStackTrace();
 			}
 

@@ -1,25 +1,40 @@
 package Component;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import java.io.IOException;
+
+import com.sendgrid.Content;
+import com.sendgrid.Email;
+import com.sendgrid.Mail;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
 
 public class SendMail {
-	public String send(String email) throws UnirestException {
+	public String send(String email, String path) throws IOException {
 		String code = createAuthCode();
-		HttpResponse<JsonNode> request = Unirest.post("https://api.mailgun.net/v3/" + System.getenv("MAILGUN_DOMAIN") + "/messages")
-	            .basicAuth("api", System.getenv("MAILGUN_API_KEY"))
-	            .field("from", System.getenv("MAILGUN_FROM_MAIL"))
-	            .field("to", email)
-	            .field("subject", "認証コード")
-	            .field("text", "認証コードをお送りします。\n\n"
-	            		     + code +"\n\n"
-	            		     + "アプリの方で認証コードを入力し、アカウントを有効にしてください。\n"
-	            		     + "なお30分以内に認証しない場合は失効されます。")
-	            .asJson();
+		Email from = new Email("maeda.kanta@moneyforward.co.jp");
+	    String subject = "【Money Forward with Family】認証コードをお送りします。会員登録を完了させてください。";
+	    Email to = new Email(email);
+	    Content content = new Content("text/html", "この度はご登録いただきありがとうございます。<BR>2段階認証のための認証コードをお送りいたしますので、ご確認の上、下記サイトよりご入力のほどお願いいたします。<BR><BR>"
+	    		+ "<span style=\"font-size: 25px; color: orange\">" + code + "</span><BR>"
+	    		+ "http://" + path + "/auth" + "<BR><BR>"
+	    		+ "※このコードはメール送信から30分間の有効期限のため、お早めにご入力のほどお願いいたします。");
+	    Mail mail = new Mail(from, subject, to, content);
 
-		System.out.println(request.getBody());
+	    SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
+	    Request request = new Request();
+	    try {
+	      request.setMethod(Method.POST);
+	      request.setEndpoint("mail/send");
+	      request.setBody(mail.build());
+	      Response response = sg.api(request);
+	      System.out.println(response.getStatusCode());
+	      System.out.println(response.getBody());
+	      System.out.println(response.getHeaders());
+	    } catch (IOException ex) {
+	      throw ex;
+	    }
 	    return code;
 	}
 

@@ -13,12 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.mashape.unirest.http.exceptions.UnirestException;
-
 import Component.SendMail;
 import model.Family;
 import model.User;
-
 /**
  * Servlet implementation class Login
  */
@@ -57,8 +54,10 @@ public class Login extends HttpServlet {
 					//認証コードの生成＆メール送信 -> 認証画面へ遷移
 					String sessionAuthCode = (String) session.getAttribute("code");
 					if (sessionAuthCode == null) {
+						StringBuffer path = request.getRequestURL();
+						String[] url = path.toString().split("/");
 						SendMail sendMail = new SendMail();
-						sessionAuthCode = sendMail.send(email);
+						sessionAuthCode = sendMail.send(email, url[2]);
 						System.out.println("認証コード: " + sessionAuthCode);
 						session.setAttribute("sessionAuthCode", sessionAuthCode);
 					}
@@ -70,10 +69,7 @@ public class Login extends HttpServlet {
 				request.getRequestDispatcher("/login.jsp").forward(request, response);
 				//				response.sendRedirect(request.getContextPath() + "/");
 			}
-		} catch (ClassNotFoundException | SQLException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		} catch (UnirestException e) {
+		} catch (ClassNotFoundException | SQLException | IOException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
