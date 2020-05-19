@@ -1,5 +1,11 @@
 package model;
 
+/**
+ * 残高モデル
+ * name ユーザ名
+ * price 残高
+ * @author maeda.kanta
+ */
 public class Balance {
 	private String name;
 	private int price;

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -24,64 +23,63 @@ import model.User;
  */
 public class BalanceController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+
 	/**
+	 * 訪問時とログアウトクリック時に呼ばれる
+	 * 訪問時にはMySQLから残高情報を取得する
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		try {
-			doIt(request, response);
-		} catch (ClassNotFoundException | ServletException | IOException | SQLException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		try {
-			doIt(request, response);
-		} catch (ClassNotFoundException | ServletException | IOException | SQLException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
-	}
-
-	private void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, ClassNotFoundException, SQLException {
 		String mode = (String)request.getParameter("mode");
 		//ログアウト判定
 		if (mode == null) {
+			// 訪問時
+			// セッションからユーザ情報と家族情報を取得する
 			HttpSession session = request.getSession();
 			User user = (User) session.getAttribute("user");
 			Family family = (Family) session.getAttribute("family");
 			if (user.getId() == -1) {
-				//ログイン画面へ遷移
+				// ユーザIDが存在しない場合はログイン画面へ遷移
 				response.sendRedirect(request.getContextPath() + "/");
 			} else {
-//				user = getUser(user);
 				ArrayList<User> userList = new ArrayList<User>();
-				if (family.getId() == -1) {
-					userList.add(getPersonalBalance(user));
-				} else {
-					userList.addAll(getWholeFamilyBalance(family.getId()));
+				try {
+					if (family.getId() == -1) {
+						// 家族と連携していない場合はアクセスしているユーザのみの残高を取得
+						userList.add(getPersonalBalance(user));
+					} else {
+						// 家族と連携中の場合は家族全員分の残高を取得
+						userList.addAll(getWholeFamilyBalance(family.getId()));
+					}
+				} catch (ClassNotFoundException | SQLException e) {
+					// TODO 自動生成された catch ブロック
+					e.printStackTrace();
 				}
+				// 合計残高の計算
 				int totalBalance = 0;
 				for (User v : userList) {
 					totalBalance += v.getBalance();
 				}
 				userList.add(0, new User(-1, "合計", family.getId(), false, totalBalance));
-				session.setAttribute("user", user);
+				// セッションに残高情報を保存
 				session.setAttribute("userList", userList);
 				request.getRequestDispatcher(request.getContextPath()+"/balance.jsp")
 						.forward(request, response);
 			}
 		} else {
+			// ログアウトクリック
 			logout(request, response);
 		}
 	}
 
+	/**
+	 * ログアウトするメソッド
+	 * 全セッション情報を削除し、ログイン画面へ遷移する
+	 * @param request
+	 * @param response
+	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
+	 * @throws SQLException 正しくSQLが実行されなかった場合
+	 */
 	private void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		//セッションの全削除
 		HttpSession session = request.getSession();
@@ -90,40 +88,19 @@ public class BalanceController extends HttpServlet {
 		  String attributeName = (String)en.nextElement();
 		  session.removeAttribute(attributeName);
 		}
-		//アプリケーションスコープの全削除
-		ServletContext sc = getServletContext();
-		en = sc.getAttributeNames();
-		while(en.hasMoreElements()) {
-			String attributeName = (String)en.nextElement();
-			sc.removeAttribute(attributeName);
-		}
 		//ログイン画面へ遷移
 		response.sendRedirect(request.getContextPath() + "/");
 	}
 
-	private User getUser(User user) throws ClassNotFoundException, SQLException {
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
-		String dbUser = System.getenv("HEROKU_DB_USER");
-		String dbPassword = System.getenv("HEROKU_DB_PASSWORD");
-		try (
-			Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
-			PreparedStatement ps = conn.prepareStatement("SELECT name, family_id FROM users WHERE id = ?");
-		) {
-			ps.setInt(1, user.getId());
-			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				user.setName(rs.getString("name"));
-				user.setFamilyId(rs.getInt("family_id"));
-			}
-			return user;
-		} catch (SQLException e) {
-			System.out.println("SQL ERROR: " + e);
-		}
-		return user;
-	}
-
+	/**
+	 * 個人の残高を取得するメソッド
+	 * @param user 取得したいユーザ情報
+	 * @return 取得したユーザ情報
+	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
+	 * @throws SQLException 正しくSQLが実行されなかった場合
+	 */
 	private User getPersonalBalance(User user) throws ClassNotFoundException, SQLException {
+		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String dbUser = System.getenv("HEROKU_DB_USER");
@@ -135,6 +112,7 @@ public class BalanceController extends HttpServlet {
 			ps.setInt(1, user.getId());
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
+				// ユーザに残高情報を追加
 				user.setBalance(rs.getInt("balance"));
 			}
 			return user;
@@ -144,7 +122,15 @@ public class BalanceController extends HttpServlet {
 		return user;
 	}
 
+	/**
+	 * 家族全員の残高を取得するメソッド
+	 * @param user 取得したい家族ID
+	 * @return 取得したユーザ情報をリスト
+	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
+	 * @throws SQLException 正しくSQLが実行されなかった場合
+	 */
 	private List<User> getWholeFamilyBalance(int familyId) throws ClassNotFoundException, SQLException {
+		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String dbUser = System.getenv("HEROKU_DB_USER");

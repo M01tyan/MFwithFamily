@@ -13,7 +13,6 @@ body {
 	text-align: center;
 }
 h1 {
-	padding-top: 150px;
 	margin-top: 0;
 	font-weight: bold;
 }
@@ -47,9 +46,10 @@ a {
 </head>
 <body>
 	<div id="progress-bar" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
+	<h2 style="padding-top: 150px;">「お金をつなぐ。繋がりを結ぶ。」</h2>
 	<h1>Money Forward <span style="color: orange;">with Family</span></h1>
 	<% String message = (String)request.getAttribute("message"); %>
-	<h2 style="color: orange;">サインアップ</h2>
+	<h2 style="color: orange;">新規登録</h2>
 	<a href="${pageContext.request.contextPath}/">&lt; 戻る</a>
 	<span style="color: red"><%= message == null ? "" : message %></span>
 	<form action="signUp" method="post">

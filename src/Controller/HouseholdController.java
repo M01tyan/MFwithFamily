@@ -27,16 +27,20 @@ import model.User;
 public class HouseholdController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	/**
+	 * 訪問時
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//		int id = Integer.parseInt(request.getParameter("id"));
+		// セッションからユーザ情報と家族情報を取得
 		HttpSession session = request.getSession();
 		Family family = (Family) session.getAttribute("family");
 		User user = (User) session.getAttribute("user");
 		try {
+			// 家族全体の口座を取得
 			List<Financial> financialList = getFinancial(family.getId(), user.getId());
+			// 家族全体の家計簿を取得
 			List<Household> householdList = getHousehold(family.getId(), user.getId());
+			// セッションに口座情報と家計簿を保存
 			session.setAttribute("financialList", financialList);
 			session.setAttribute("householdList", householdList);
 		} catch (ClassNotFoundException | SQLException e) {
@@ -48,9 +52,11 @@ public class HouseholdController extends HttpServlet {
 	}
 
 	/**
+	 * 新しく家計簿をつけた際に呼ばれる
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// 入力フォームから新しい家計簿の情報を取得
 		request.setCharacterEncoding("utf-8");
 		String date = request.getParameter("date");
 		int price = Integer.parseInt(request.getParameter("price"));
@@ -63,37 +69,59 @@ public class HouseholdController extends HttpServlet {
 		String memo = request.getParameter("memo");
 		int sourceUid = Integer.parseInt(request.getParameter("sourceUid"));
 		int transferUid = Integer.parseInt(request.getParameter("transferUid"));
-		System.out.println(date + " " + price + " " + financialId + " " + isTransfer + " " + transferId + " " + content + " " + largeItem + " " + middleItem + " " + memo + " " + sourceUid + " " + transferUid);
 		try {
 			if (!isTransfer) {
+				// 支出の場合
 				recordExpense(date, content, -price, financialId, largeItem, middleItem, memo, isTransfer, sourceUid);
 			} else {
+				// 振替の場合
 				recordTransfer(date, content, price, financialId, transferId, memo, isTransfer, sourceUid, transferUid);
 			}
 		} catch (ClassNotFoundException | SQLException e) {
 			System.out.println("ERROR: " + e);
 		}
+		// MySQLへの保存完了後再レンダリング
 		response.sendRedirect(request.getContextPath()+"/household");
 	}
 
+	/**
+	 * 支出の記録するメソッド
+	 * MySQLのhouseholdテーブルへ新しい支出を登録&口座残高の更新をトランザクション処理する
+	 * @param date 日付
+	 * @param content 内容
+	 * @param price 値段
+	 * @param financialId 口座ID
+	 * @param largeItem 大項目
+	 * @param middleItem 中項目
+	 * @param memo メモ
+	 * @param isTransfer 振替フラグ
+	 * @param uid 支払者のuid
+	 * @throws SQLException 正しくSQLが実行されなかった場合
+	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
+	 */
 	private void recordExpense(String date, String content, int price, int financialId, String largeItem, String middleItem, String memo, boolean isTransfer, int uid) throws ClassNotFoundException, SQLException {
+		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		String householdId = "";
+		// UNIQUEな家計簿IDの生成
 		do {
 			householdId = createHouseholdId();
 		} while (!checkUniqueHouseholdId(householdId));
 		try (
 			Connection conn = DriverManager.getConnection(url, user, password);
+			// 家計簿を記録
 			PreparedStatement ps1 = conn.prepareStatement("INSERT INTO household "
 							+ "(`date`, `content`, `price`, `financial_id`, `large_item`, `middle_item`, `memo`, `transfer`, `id`, `user_id`) "
 							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+			// 口座残高の更新
 			PreparedStatement ps2 = conn.prepareStatement("UPDATE financial SET balance = balance + ? WHERE id = ?;");
 		) {
 			conn.setAutoCommit(false);
 
+			// 家計簿
 			ps1.setString(1, date);
 			ps1.setString(2, content);
 			ps1.setInt(3, price);
@@ -106,6 +134,7 @@ public class HouseholdController extends HttpServlet {
 			ps1.setInt(10, uid);
 			ps1.executeUpdate();
 
+			//口座
 			ps2.setInt(1, price);
 			ps2.setInt(2, financialId);
 			ps2.executeUpdate();
@@ -125,13 +154,30 @@ public class HouseholdController extends HttpServlet {
 		}
 	}
 
+	/**
+	 * 振替を記録するメソッド
+	 * MySQLのhouseholdテーブルに支出と収入の２回記録&口座残高の更新をトランザクション処理する
+	 * @param date 日付
+	 * @param content 内容
+	 * @param price 値段
+	 * @param financialId 振替元の口座ID
+	 * @param transferId 振替先の口座ID
+	 * @param memo メモ
+	 * @param isTransfer 振替フラグ
+	 * @param sourceUid 振替元のユーザID
+	 * @param transferUid 振替先のユーザID
+	 * @throws SQLException 正しくSQLが実行されなかった場合
+	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
+	 */
 	private void recordTransfer(String date, String content, int price, int financialId, int transferId, String memo, boolean isTransfer, int sourceUid, int transferUid) throws ClassNotFoundException, SQLException {
+		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		String householdId1 = "";
 		String householdId2 = "";
+		// UNIQUEな家計簿IDを２つ生成
 		do {
 			householdId1 = createHouseholdId();
 			householdId2 = createHouseholdId();
@@ -145,6 +191,7 @@ public class HouseholdController extends HttpServlet {
 		) {
 			conn.setAutoCommit(false);
 
+			// 振替元
 			ps1.setString(1, date);
 			ps1.setString(2, content);
 			ps1.setInt(3, -price);
@@ -161,6 +208,7 @@ public class HouseholdController extends HttpServlet {
 			ps2.setInt(2, financialId);
 			ps2.executeUpdate();
 
+			// 振替先
 			ps1.setString(1, date);
 			ps1.setString(2, content);
 			ps1.setInt(3, price);
@@ -192,7 +240,16 @@ public class HouseholdController extends HttpServlet {
 		}
 	}
 
+	/**
+	 * 家族全員の口座情報の取得メソッド
+	 * @param familyId 家族ID
+	 * @param uid ユーザID
+	 * @return 家族全員の口座情報
+	 * @throws SQLException 正しくSQLが実行されなかった場合
+	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
+	 */
 	private List<Financial> getFinancial(int familyId, int uid) throws ClassNotFoundException, SQLException {
+		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
@@ -218,13 +275,11 @@ public class HouseholdController extends HttpServlet {
 		return financial;
 	}
 
-	public int getFinancialIdFromFinancialName(List<Financial> financialList, String financialName) {
-		for (Financial financial : financialList) {
-			if (financial.getFinancialName().equals(financialName)) return financial.getId();
-		}
-		return -1;
-	}
-
+	/**
+	 * 家族IDの生成メソッド
+	 * 22文字の半角英数字のランダムな文字列を生成
+	 * @return 家族ID
+	 */
 	private String createHouseholdId() {
 		Random r = new Random();
 		String alphabet = "abcdefghijklmnopqrstuv-_wxyzABCDEFGHIJKLMNOPQRSTUVWXY-_Z01234567890123456789";
@@ -238,7 +293,16 @@ public class HouseholdController extends HttpServlet {
 		return id;
 	}
 
+	/**
+	 * 家族IDがUNIQUEかを判定するメソッド
+	 * 引数の家計簿IDがMySQL上のhouseholdテーブルのidと重複していないかをチェックする
+	 * @param id createHouseholdId()によって生成された家計簿ID
+	 * @return 判定結果(true: UNIQUE, false; DISTINCT)
+	 * @throws SQLException 正しくSQLが実行されなかった場合
+	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
+	 */
 	private boolean checkUniqueHouseholdId(String id) throws ClassNotFoundException, SQLException {
+		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");
@@ -263,8 +327,18 @@ public class HouseholdController extends HttpServlet {
 		return false;
 	}
 
+	/**
+	 * 家計簿を取得メソッド
+	 * MySQL上のhouseholdテーブルからfamily_idが同じ家計簿を取得
+	 * @param familyId 家族ID
+	 * @param uid アクセスしているユーザID
+	 * @return 家計簿一覧
+	 * @throws SQLException 正しくSQLが実行されなかった場合
+	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
+	 */
 	private List<Household> getHousehold(int familyId, int uid) throws ClassNotFoundException, SQLException {
 		List<Household> list = new ArrayList<Household>();
+		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String user = System.getenv("HEROKU_DB_USER");

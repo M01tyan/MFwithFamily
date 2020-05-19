@@ -282,11 +282,12 @@ button:focus {
 </style>
 </head>
 <body>
-	<div id="progress-bar"
-		class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
+	<!-- プログレスバー -->
+	<div id="progress-bar" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
+	<!-- Header -->
 	<div
-		class="android-header mdl-layout__header mdl-layout__header--waterfall">
-		<div class="mdl-layout__header-row">
+		class="android-header mdl-layout__header--waterfall">
+		<div class="mdl-layout__header-row" style="padding: 0 0 0 5px;">
 			<span class="android-title mdl-layout-title">
 				<p style="font-size: 24px; font-weight: bold; margin-top: 20px">
 					Money Forward <span style="color: orange;">with Family</span>
@@ -297,20 +298,15 @@ button:focus {
 			<!-- Navigation -->
 			<div class="android-navigation-container">
 				<nav class="android-navigation mdl-navigation">
-					<a class="mdl-navigation__link mdl-typography--text-uppercase"
-						href="${pageContext.request.contextPath}/balance">残高</a> <a
-						class="mdl-navigation__link mdl-typography--text-uppercase"
-						href="${pageContext.request.contextPath}/share">家族追加</a> <a
-						class="mdl-navigation__link mdl-typography--text-uppercase"
-						href="${pageContext.request.contextPath}/household">家計簿</a> <a
-						class="mdl-navigation__link mdl-typography--text-uppercase"
-						href="">マイメニュー</a> <a
-						class="mdl-navigation__link mdl-typography--text-uppercase"
-						href="${pageContext.request.contextPath}/balance?mode=logout">ログアウト</a>
+					<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/balance">残高</a>
+					<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/share">家族追加</a>
+					<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/household">家計簿</a>
+					<a class="mdl-navigation__link mdl-typography--text-uppercase" href="${pageContext.request.contextPath}/balance?mode=logout">ログアウト</a>
 				</nav>
 			</div>
 		</div>
 	</div>
+	<!-- 戻るボタン&Title -->
 	<a href="${pageContext.request.contextPath}/balance"
 		style="position: absolute; left: 50px; top: 80px;" id="back-button">&lt;
 		戻る</a>
@@ -318,33 +314,77 @@ button:focus {
 	<%
 	List<Financial> financialList = (List<Financial>) session.getAttribute("financialList");
 	User user = (User) session.getAttribute("user");
+	List<User> userList = (List<User>) session.getAttribute("userList");
 	int id = Integer.parseInt(request.getParameter("id"));
 	%>
+	<!-- 公開口座一覧 -->
+	<%
+	String userName = financialList.get(0).getUserName();
+	List<Financial> personFinancial = new ArrayList<Financial>();
+	for (Financial financial : financialList) {
+		if (financial.getPublish()) {
+	%>
+	<%
+			if (!userName.equals(financial.getUserName())) {
+	%>
+	<p style="width: 80%; text-align: left; margin: 0 auto; font-size: 20px;"><%= userName %></p>
 	<div class="mdl-grid financial-container">
 		<%
-		for (Financial financial : financialList) {
-			if (financial.getPublish()) {
+		for (Financial v : personFinancial) {
 		%>
 		<div class="mdl-cell mdl-cell--4-col financial">
 			<p class="financial__balance">
-				¥<%=financial.getBalance()%></p>
-			<p class="financial__name"><%=financial.getFinancialName()%></p>
+				¥<%=v.getBalance()%></p>
+			<p class="financial__name"><%=v.getFinancialName()%></p>
 			<%
-				if (user.getId() == financial.getUid()) {
+				if (user.getId() == v.getUid()) {
 			%>
 			<button
 				class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab delete-button">
 				<i class="material-icons">add</i>
 			</button>
-			<%
-				}
-			%>
-			<p class="financial__user"><%=financial.getUserName()%></p>
+			<% } %>
+			<p class="financial__user"><%=v.getUserName()%></p>
 		</div>
-		<%	}
-		}
-		%>
+		<% } %>
 	</div>
+	<%
+		personFinancial.clear();
+		personFinancial.add(financial);
+	} else {
+		personFinancial.add(financial);
+	}
+	%>
+	<% 	userName = financial.getUserName();
+		}
+	}%>
+	<% if (personFinancial.size() != 0) { %>
+	<p style="width: 80%; text-align: left; margin: 0 auto; font-size: 20px;"><%= userName %></p>
+	<div class="mdl-grid financial-container">
+	<% } %>
+	<% for (Financial v : personFinancial) { %>
+		<div class="mdl-cell mdl-cell--4-col financial">
+			<p class="financial__balance">
+				¥<%=v.getBalance()%></p>
+			<p class="financial__name"><%=v.getFinancialName()%></p>
+			<%
+				if (user.getId() == v.getUid()) {
+			%>
+			<button
+				class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab delete-button">
+				<i class="material-icons">add</i>
+			</button>
+			<% } %>
+			<p class="financial__user"><%=v.getUserName()%></p>
+		</div>
+	<% } %>
+	<% if (personFinancial.size() != 0) { %>
+	</div>
+	<% } %>
+	<!-- へそくり口座一覧 -->
+	<% if (id == 0 || userList.get(id).getId() == user.getId()) { %>
+	<p style="width: 80%; text-align: left; margin: 0 auto; font-size: 20px;">非公開口座</p>
+	<% } %>
 	<div class="mdl-grid financial-container">
 		<%
 		for (Financial financial : financialList) {
@@ -373,6 +413,7 @@ button:focus {
 	<%
 		if (user.getId() == financialList.get(0).getUid() || id == 0) {
 	%>
+	<!-- 口座追加フォーム -->
 	<div class="financial-form">
 		<form action="financial" method="post" id="form">
 			<input type="hidden" name="id"
@@ -392,10 +433,9 @@ button:focus {
 						style="padding-left: 20px; width: 95%;">残高</label>
 				</div>
 			</div>
-			<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect"
-				for="secret" style="width: auto; margin-bottom: 10px;"> <input
-				type="checkbox" id="secret" class="mdl-checkbox__input"
-				name="publish" checked> <span class="mdl-checkbox__label">家族全員に公開します</span>
+			<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="secret" style="width: auto; margin-bottom: 10px;">
+			<input type="checkbox" id="secret" class="mdl-checkbox__input" name="publish" value="true" checked>
+			<span class="mdl-checkbox__label">家族全員に公開します</span>
 			</label><BR> <input
 				class="mdl-button mdl-js-button mdl-js-ripple-effect button"
 				type="submit" value="送信" id="submit-button" style="margin: auto;">
@@ -405,6 +445,7 @@ button:focus {
 		}
 	%>
 
+	<!-- 削除ダイアログ -->
 	<dialog class="mdl-dialog" style="width: 50%;">
 	<h4 class="mdl-dialog__title">この口座を削除しますか？</h4>
 	<div class="mdl-dialog__content">
@@ -430,6 +471,14 @@ button:focus {
 		const form = document.getElementById("form");
 		form.addEventListener('submit', () => {
 			progressBar.style.cssText = "display: block;";
+		});
+
+		//公開チャックボックスを押した時の処理
+		const checkBox = document.getElementById("secret");
+		let publish = true;
+		checkBox.addEventListener('click', event => {
+			publish = !publish;
+			checkBox.value = publish;
 		});
 
 		//ダイアログ

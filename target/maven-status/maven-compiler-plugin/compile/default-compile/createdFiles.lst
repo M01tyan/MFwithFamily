@@ -1,9 +1,6 @@
-model/Analytics.class
-model/Relationship.class
 model/Family.class
 Component/SendMail.class
 Controller/Authentication.class
-Controller/BreakdownController.class
 Controller/HouseholdController.class
 Controller/ShareController.class
 Controller/FinancialController.class
@@ -14,5 +11,4 @@ model/User.class
 Controller/BalanceController.class
 model/Balance.class
 model/Household.class
-Component/AESCipher.class
 Component/Color.class

@@ -1,7 +1,14 @@
 package Component;
 
+/**
+ * カラーenum
+ * 6色のカラーを事前に作成
+ * 薄い色と濃い色の２種類用意
+ * 薄い色は残高画面の財布の色に使用
+ * 濃い色は家族追加画面のユーザごとの色
+ * @author maeda.kanta
+ */
 public enum Color {
-	Orange("#FAB97D", "#FE8413"),
 	Green("#B3FE85", "#51C20C"),
 	Red("#FF9898", "#ED2828"),
 	Blue("#9FD1FF", "#1773C9"),
