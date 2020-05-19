@@ -65,10 +65,11 @@ public class FinancialController extends HttpServlet {
 		User user = (User) session.getAttribute("user");
 		// 口座フォームから、口座名、残高、公開フラグを取得
 		String name = request.getParameter("name");
-		int balance = Integer.parseInt(request.getParameter("balance"));
+		int balance = request.getParameter("balance").length() < 10 ? Integer.parseInt(request.getParameter("balance")) : 1000000000;
 		boolean publish = Boolean.valueOf(request.getParameter("publish"));
 		// 再リダイレクトのためのidを取得
 		String id = request.getParameter("id");
+
 		try {
 			// MySQLへ口座情報を追加
 			addFinancial(name, balance, user.getId(), publish);
