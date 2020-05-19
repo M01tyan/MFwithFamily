@@ -187,7 +187,7 @@ public class SignUp extends HttpServlet {
 	private int createFinancial(int uid) throws SQLException, ClassNotFoundException {
 		//MySQLへの接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String DBUser = System.getenv("HEROKU_DB_USER");
 		String DBPassword = System.getenv("HEROKU_DB_PASSWORD");
 		int id = -1;
