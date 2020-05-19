@@ -1,5 +1,16 @@
 package model;
 
+/**
+ * 口座モデル
+ * id 口座ID
+ * financialName 口座名
+ * userName 口座所有者のユーザ名
+ * uid 口座所有者のユーザID
+ * balance 残高
+ * publish 公開フラグ
+ * @author maeda.kanta
+ *
+ */
 public class Financial {
 	private int id;
 	private String financialName;

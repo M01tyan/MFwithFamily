@@ -1,5 +1,20 @@
 package model;
 
+/**
+ * 家計簿モデル
+ * date 日付
+ * content 内容
+ * price 値段
+ * financial 口座名
+ * largeItem 大項目
+ * middleItem 中項目
+ * memo メモ
+ * transfer 振替フラグ
+ * id 家計簿ID
+ * userName 記入者のユーザID
+ * @author maeda.kanta
+ *
+ */
 public class Household {
 	private String date;
 	private String content;

@@ -3,6 +3,14 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 家族モデル
+ * id 家族ID
+ * shareCode 家族コード
+ * userList 家族の個別のユーザ情報
+ * @author maeda.kanta
+ *
+ */
 public class Family {
 	private int id;
 	private String shareCode;

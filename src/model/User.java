@@ -1,5 +1,15 @@
 package model;
 
+/**
+ * ユーザモデル
+ * uid ユーザID
+ * name ユーザ名
+ * familyId 家族ID
+ * emailCertificate メール認証フラグ
+ * balance 残高
+ * @author maeda.kanta
+ *
+ */
 public class User {
 	private int uid;
 	private String name;

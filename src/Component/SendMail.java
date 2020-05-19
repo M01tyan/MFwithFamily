@@ -10,7 +10,19 @@ import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 
+/**
+ * メール送信クラス
+ * @author maeda.kanta
+ */
 public class SendMail {
+	/**
+	 * メール送信メソッド
+	 * ランダムな6文字の数字を生成し、SendGrid APIを使用してメールへ送信
+	 * @param email 生のメールアドレス
+	 * @param path 認証画面へのパス
+	 * @return 生成された任用コード
+	 * @throws IOException
+	 */
 	public String send(String email, String path) throws IOException {
 		String code = createAuthCode();
 		Email from = new Email("maeda.kanta@moneyforward.co.jp");
@@ -22,6 +34,7 @@ public class SendMail {
 	    		+ "※このコードはメール送信から30分間の有効期限のため、お早めにご入力のほどお願いいたします。");
 	    Mail mail = new Mail(from, subject, to, content);
 
+	    // 環境変数からSendGridのAPIキーを取得
 	    SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
 	    Request request = new Request();
 	    try {
@@ -38,8 +51,13 @@ public class SendMail {
 	    return code;
 	}
 
-	public static String createAuthCode() {
-		int FINAL_NUMBER = 4;
+	/**
+	 * 認証コードを生成するメソッド
+	 * ランダムな6文字の数字を生成する
+	 * @return 生成された6文字の認証コード
+	 */
+	public String createAuthCode() {
+		int FINAL_NUMBER = 6;
 		String code = "";
 		for (int i=0; i<FINAL_NUMBER; i++) {
 			code += (int)(Math.random() * 9) + 1;

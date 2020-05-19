@@ -19,15 +19,8 @@ import model.User;
 public class Authentication extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public Authentication() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-
 	/**
+	 * 訪問時に呼ばれるメソッド
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -36,15 +29,19 @@ public class Authentication extends HttpServlet {
 	}
 
 	/**
+	 * 認証コードを入力した時に呼ばれるメソッド
+	 * セッションい保存された認証コードと入力された認証コードが正しいかをチェックし、正しい場合は新規登録を完了させる
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// DB接続
 		response.setContentType("text/html; charset=UTF-8");
 		HttpSession session = request.getSession();
 		String inputAuthCode = (String)request.getParameter("authCode");
 		String sessionAuthCode = (String)session.getAttribute("sessionAuthCode");
 		String message = "";
 		if (sessionAuthCode.equals(inputAuthCode)) {
+			// 認証コードが正しい場合MySQLのメール認証フラグをtrueに変更し、残高画面へ遷移
 			System.out.println("Authentication Success!!");
 			try {
 				User user = (User) session.getAttribute("user");
@@ -56,13 +53,22 @@ public class Authentication extends HttpServlet {
 				e.printStackTrace();
 			}
 		} else {
+			// 認証コードが異なる場合、エラーメッセージを表示
 			message += "認証コードが違います";
 			request.setAttribute("message", message);
 			request.getRequestDispatcher("/auth.jsp").forward(request, response);
 		}
 	}
 
+	/**
+	 * MySQLのメール認証フラグをtrueにするメソッド
+	 * @param user アクセスしているユーザ情報
+	 * @return 更新されたユーザ情報
+	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
+	 * @throws SQLException 正しくSQLが実行されなかった場合
+	 */
 	private User updateEmailCertificate(User user) throws SQLException, ClassNotFoundException{
+		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
 		String DBUser = System.getenv("HEROKU_DB_USER");
