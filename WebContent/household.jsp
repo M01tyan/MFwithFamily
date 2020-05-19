@@ -512,19 +512,22 @@ button:focus {
 			});
 		}
 		let householdList = [];
-		for (let i=0; i<document.household_list.date.length; i++) {
-			householdList.push({
-				date: document.household_list.date[i].value,
-				content: document.household_list.content[i].value,
-				price: document.household_list.price[i].value,
-				financial: document.household_list.financial[i].value,
-				largeItem: document.household_list.largeItem[i].value,
-				middleItem: document.household_list.middleItem[i].value,
-				memo: document.household_list.memo[i].value,
-				transfer: document.household_list.transfer[i].value,
-				id: document.household_list.id[i].value,
-				userName: document.household_list.userName[i].value,
-			});
+		console.log(document.household_list.data !== undefined)
+		if (document.household_list.data !== undefined) {
+			for (let i=0; i<document.household_list.date.length; i++) {
+				householdList.push({
+					date: document.household_list.date[i].value,
+					content: document.household_list.content[i].value,
+					price: document.household_list.price[i].value,
+					financial: document.household_list.financial[i].value,
+					largeItem: document.household_list.largeItem[i].value,
+					middleItem: document.household_list.middleItem[i].value,
+					memo: document.household_list.memo[i].value,
+					transfer: document.household_list.transfer[i].value,
+					id: document.household_list.id[i].value,
+					userName: document.household_list.userName[i].value,
+				});
+			}
 		}
 		const uid = document.user.id.value;
 
