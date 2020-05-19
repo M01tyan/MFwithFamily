@@ -158,9 +158,12 @@ public class FinancialController extends HttpServlet {
 			conn.prepareStatement("SELECT financial.id AS id, users.id AS user_id, users.name AS user_name, financial.name AS financial_name, balance, publish "
 					+ "FROM users "
 					+ "INNER JOIN financial ON users.id = financial.user_id "
-					+ "WHERE users.family_id = ? AND financial.target = true;");
+					+ "WHERE CASE ? WHEN -1 THEN users.id = ? ELSE family_id = ? END "
+					+ "AND financial.target = true;");
 		) {
 			ps.setInt(1, familyId);
+			ps.setInt(2, uid);
+			ps.setInt(3, familyId);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				// 取得した口座がアクセスしているユーザのものなら"あなた"に変更
