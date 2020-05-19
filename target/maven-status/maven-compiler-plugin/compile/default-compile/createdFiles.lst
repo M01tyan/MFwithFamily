@@ -1,3 +1,4 @@
+Component/Util.class
 model/Family.class
 Component/SendMail.class
 Controller/Authentication.class
