@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8" import="model.Financial" import="model.User"
-	import="java.util.*"%>
+	import="java.util.*" import="Component.SendMail"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -334,7 +334,7 @@ button:focus {
 		%>
 		<div class="mdl-cell mdl-cell--4-col financial">
 			<p class="financial__balance">
-				¥<%=v.getBalance()%></p>
+				¥<%=SendMail.comma(v.getBalance())%></p>
 			<p class="financial__name"><%=v.getFinancialName()%></p>
 			<%
 				if (user.getId() == v.getUid()) {
@@ -365,7 +365,7 @@ button:focus {
 	<% for (Financial v : personFinancial) { %>
 		<div class="mdl-cell mdl-cell--4-col financial">
 			<p class="financial__balance">
-				¥<%=v.getBalance()%></p>
+				¥<%=SendMail.comma(v.getBalance())%></p>
 			<p class="financial__name"><%=v.getFinancialName()%></p>
 			<%
 				if (user.getId() == v.getUid()) {
