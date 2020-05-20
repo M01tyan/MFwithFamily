@@ -170,7 +170,7 @@ public class ShareController extends HttpServlet {
 	private boolean checkUniqueShareCode(String shareCode) throws ClassNotFoundException, SQLException {
 		// DBへの接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		try (
@@ -203,7 +203,7 @@ public class ShareController extends HttpServlet {
 	 */
 	private Family createFamily(String shareCode) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String DBUser = System.getenv("HEROKU_DB_USER");
 		String DBPassword = System.getenv("HEROKU_DB_PASSWORD");
 		Family family = new Family();
@@ -238,7 +238,7 @@ public class ShareController extends HttpServlet {
 	private void setFamilyId(int familyId, int uid) throws ClassNotFoundException, SQLException {
 		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String DBUser = System.getenv("HEROKU_DB_USER");
 		String DBPassword = System.getenv("HEROKU_DB_PASSWORD");
 		try (
@@ -266,7 +266,7 @@ public class ShareController extends HttpServlet {
 	private Family checkShareCode(String shareCode, User user) throws ClassNotFoundException, SQLException {
 		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String DBUser = System.getenv("HEROKU_DB_USER");
 		String DBPassword = System.getenv("HEROKU_DB_PASSWORD");
 		// ユーザリスト(家族の個別ユーザ情報)の初期化
@@ -323,7 +323,7 @@ public class ShareController extends HttpServlet {
 	private Family getFamily(User user) throws ClassNotFoundException, SQLException {
 		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String DBUser = System.getenv("HEROKU_DB_USER");
 		String DBPassword = System.getenv("HEROKU_DB_PASSWORD");
 		List<User> userList = new ArrayList<User>();
@@ -381,7 +381,7 @@ public class ShareController extends HttpServlet {
 	 */
 	private void releaseFamily(int uid) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String DBUser = System.getenv("HEROKU_DB_USER");
 		String DBPassword = System.getenv("HEROKU_DB_PASSWORD");
 		try (

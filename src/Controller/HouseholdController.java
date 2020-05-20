@@ -251,7 +251,7 @@ public class HouseholdController extends HttpServlet {
 	private List<Financial> getFinancial(int familyId, int uid) throws ClassNotFoundException, SQLException {
 		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		List<Financial> financial = new ArrayList<Financial>();
@@ -307,7 +307,7 @@ public class HouseholdController extends HttpServlet {
 	private boolean checkUniqueHouseholdId(String id) throws ClassNotFoundException, SQLException {
 		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		try (
@@ -343,7 +343,7 @@ public class HouseholdController extends HttpServlet {
 		List<Household> list = new ArrayList<Household>();
 		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		try (
