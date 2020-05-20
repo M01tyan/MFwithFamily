@@ -37,6 +37,7 @@ public class SignUp extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("text/html; charset=UTF-8");
+		request.setCharacterEncoding("UTF-8");
 		//Formから入力された文字列を受け取る
 		String email = (String)request.getParameter("email");
 		String password = (String)request.getParameter("password");
@@ -139,7 +140,7 @@ public class SignUp extends HttpServlet {
 	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
 	 */
 	private User createUser(String email, String password, String name) throws SQLException, ClassNotFoundException {
-		System.out.println(email + " : " + password);
+		System.out.println(email + " : " + password + " " + name);
 		//MySQLへの接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
