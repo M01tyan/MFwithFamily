@@ -4,6 +4,7 @@
     import="model.User"
     import="java.util.*"
     import="Component.Color"
+    import="Component.SendMail"
 %>
 <!DOCTYPE html>
 <html>
@@ -190,7 +191,7 @@ h1 {
 					<circle cx="149.712" cy="18" r="18" fill="#FAB97D"/>
 					<circle cx="185.712" cy="18" r="18" fill="#FAB97D"/>
 				</svg>
-				<p class="wallet-price" style="font-size: 40px; color: white">¥<%= userList.get(0).getBalance() %></p>
+				<p class="wallet-price" style="font-size: 40px; color: white">¥<%= SendMail.comma(userList.get(0).getBalance()) %></p>
 			</div>
 			<h3>全体</h3>
 		</a>
@@ -207,7 +208,7 @@ h1 {
 					<ellipse cx="68.9369" cy="8.29831" rx="8.28832" ry="8.29831" fill="<%=color%>"/>
 					<ellipse cx="85.5135" cy="8.29831" rx="8.28832" ry="8.29831" fill="<%=color%>"/>
 				</svg>
-				<p class="wallet-price" id="price">¥<%= userList.get(i).getBalance() %></p>
+				<p class="wallet-price" id="price">¥<%= SendMail.comma(userList.get(i).getBalance()) %></p>
 				<p><%= name %></p>
 			</a>
 			<% } %>

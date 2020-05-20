@@ -6,6 +6,7 @@
 	import="model.Financial"
 	import="model.Household"
 	import="model.User"
+	import="Component.SendMail"
 %>
 <!DOCTYPE html>
 <html>
@@ -485,7 +486,7 @@ button:focus {
 			<tr class="<%= household.getTransfer() ? "is-transfer" : ""%>">
 				<td class="mdl-data-table__cell--non-numeric"><%=household.getDate()%></td>
 				<td class="mdl-data-table__cell--non-numeric"><%=household.getContent()%></td>
-				<td><%=household.getPrice()%></td>
+				<td><%=SendMail.comma(household.getPrice())%></td>
 				<td class="mdl-data-table__cell--non-numeric"><%=household.getFinancial()%></td>
 				<td class="mdl-data-table__cell--non-numeric"><%=household.getLargeItem()%></td>
 				<td class="mdl-data-table__cell--non-numeric"><%=household.getMiddleItem()%></td>
@@ -728,7 +729,8 @@ button:focus {
 						if(key == "id" || key == "transfer") continue;
 						const td = document.createElement('td');
 						if (key != "price") td.classList.add("mdl-data-table__cell--non-numeric");
-						td.innerText = value;
+						if (key == "price") td.innerText = value.replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+						else td.innerText = value;
 						tr.appendChild(td);
 					}
 					householdItems.appendChild(tr);
@@ -815,7 +817,8 @@ button:focus {
 					if(key == "id" || key == "transfer") continue;
 					const td = document.createElement('td');
 					if (key != "price") td.classList.add("mdl-data-table__cell--non-numeric");
-					td.innerText = value;
+					if (key == "price") td.innerText = value.replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+					else td.innerText = value;
 					tr.appendChild(td);
 				}
 				householdItems.appendChild(tr);
@@ -838,7 +841,8 @@ button:focus {
 					if(key == "id" || key == "transfer") continue;
 					const td = document.createElement('td');
 					if (key != "price") td.classList.add("mdl-data-table__cell--non-numeric");
-					td.innerText = value;
+					if (key == "price") td.innerText = value.replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+					else td.innerText = value;
 					tr.appendChild(td);
 				}
 				householdItems.appendChild(tr);
