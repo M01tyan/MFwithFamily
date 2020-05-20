@@ -282,7 +282,7 @@ h1 {
 	<p style="font-size: 20px; color: orange; margin-top: 60px;">おうちに入る</p>
 	<form name="inputShareCode" action="share" method="post" class="share-code__input" id="form">
 		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-	    	<input class="mdl-textfield__input" type="text" id="share-code" name="inputShareCode" style="padding-top: 20px;" pattern="[a-zA-Z0-9]">
+	    	<input class="mdl-textfield__input" type="text" id="share-code" name="inputShareCode" style="padding-top: 20px;" pattern="[a-zA-Z0-9]{8}">
 	    	<label class="mdl-textfield__label" for="share-code">家族コードの入力</label>
 		</div>
 		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--1-col" style="text-align: left; margin-top: 27px;">
