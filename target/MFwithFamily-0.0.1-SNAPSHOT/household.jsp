@@ -228,7 +228,7 @@ button:focus {
 }
 
 .is-transfer {
-	color: #e3e3e3;
+	color: #d3d3d3;
 }
 
 </style>
@@ -244,20 +244,21 @@ button:focus {
 	%>
 	<form name="financial_list">
 		<% for (Financial financial : financialList) { %>
+		<% if (financial.getPublish() || financial.getUid() == user.getId() ) { %>
 		<input type="hidden" name="id" value="<%= financial.getId() %>">
 		<input type="hidden" name="uid" value="<%= financial.getUid() %>">
 		<input type="hidden" name="name" value="<%= financial.getFinancialName() %>">
 		<input type="hidden" name="userName" value="<%= financial.getUserName() %>">
 		<input type="hidden" name="balance" value="<%= financial.getBalance() %>">
 		<input type="hidden" name="publish" value="<%= financial.getPublish() %>">
-		<% } %>
+		<% } }%>
 	</form>
 	<form name="user">
 		<input type="hidden" name="id" value="<%= user.getId() %>">
 	</form>
 	<form name="household_list">
 		<% for (Household household : householdList) { %>
-		<input type="hidden" name="date" value="<%= household.getDate() %>">
+		<input type="hidden" name="date" value="<%= household.getDate().substring(0,10) %>">
 		<input type="hidden" name="content" value="<%= household.getContent() %>">
 		<input type="hidden" name="price" value="<%= household.getPrice() %>">
 		<input type="hidden" name="financial" value="<%= household.getFinancial() %>">
@@ -484,7 +485,7 @@ button:focus {
 			%>
 
 			<tr class="<%= household.getTransfer() ? "is-transfer" : ""%>">
-				<td class="mdl-data-table__cell--non-numeric"><%=household.getDate()%></td>
+				<td class="mdl-data-table__cell--non-numeric"><%=household.getDate().substring(0,10)%></td>
 				<td class="mdl-data-table__cell--non-numeric"><%=household.getContent()%></td>
 				<td><%=SendMail.comma(household.getPrice())%></td>
 				<td class="mdl-data-table__cell--non-numeric"><%=household.getFinancial()%></td>
@@ -530,7 +531,7 @@ button:focus {
 			}
 		}
 		const uid = document.user.id.value;
-
+		let financialFilter = financialList;
 
 		//本日の日付を初期値
 		let today = new Date();
@@ -622,8 +623,8 @@ button:focus {
 					const index = [].slice.call(financials).indexOf(financial);
 					financials[index].setAttribute("disabled", "disabled");
 					financialText.value = event.currentTarget.innerText;
-					financialUid.value = financialList[index].uid;
-					financialId.value = financialList[index].id;
+					financialUid.value = financialFilter[index].uid;
+					financialId.value = financialFilter[index].id;
 					Array.from(transfers).forEach(transfer => {
 						transfer.removeAttribute("disabled");
 					});
@@ -641,8 +642,8 @@ button:focus {
 				const index = [].slice.call(transfers).indexOf(transfer);
 				if (!event.currentTarget.getAttribute("disabled")) {
 					transferText.value = event.currentTarget.innerText;
-					transferUid.value = financialList[index].uid;
-					transferId.value = financialList[index].id;
+					transferUid.value = financialFilter[index].uid;
+					transferId.value = financialFilter[index].id;
 				}
 			});
 		});
@@ -657,7 +658,8 @@ button:focus {
 		//送信ボタンを押した時
 		const submitButton = document.getElementById("submit-button");
 		submitButton.addEventListener('click', event => {
-			const date = document.getElementById("date");
+			const now = new Date();
+			const date = document.getElementById("date").value+" "+now.getHours()+":"+now.getMinutes()+":"+now.getSeconds();
 			const price = document.getElementById("price");
 			const financialId = document.getElementById("financial-id");
 			const isTransfer = document.getElementById("transfer-button");
@@ -668,8 +670,9 @@ button:focus {
 			const memo = document.getElementById("memo");
 			const sourceUid = document.getElementById("financial-uid");
 			const transferUid = document.getElementById("transfer-uid");
+			console.log(date);
 			const data = {
-				date: date.value,
+				date: date,
 				price: price.value,
 				financialId: financialId.value,
 				isTransfer: isTransfer.value,
@@ -740,7 +743,7 @@ button:focus {
 					financialLists.removeChild(financialLists.firstChild);
 					transferLists.removeChild(transferLists.firstChild);
 				}
-				const financialFilter = targetTabName == "全体"
+				financialFilter = targetTabName == "全体"
 										? financialList
 										: financialList.filter(financial => financial.userName.toUpperCase() == targetTabName );
 				financialFilter.map((financial, index) => {
@@ -798,6 +801,7 @@ button:focus {
 		});
 
 		//月別フィルター
+		//先月
 		const leftButton = document.getElementById("left-button");
 		const rightButton = document.getElementById("right-button");
 		leftButton.addEventListener('click', event => {
@@ -810,6 +814,8 @@ button:focus {
 			while (householdItems.firstChild) {
 				householdItems.removeChild(householdItems.firstChild);
 			}
+			console.log(householdList);
+			console.log(result);
 			result.map(household => {
 				const tr = document.createElement('tr');
 				for (let [key, value] of Object.entries(household)) {
@@ -824,6 +830,7 @@ button:focus {
 				householdItems.appendChild(tr);
 			});
 		});
+		//翌月
 		rightButton.addEventListener('click', event => {
 			today = new Date(today.getFullYear()+"-"+(today.getMonth()+2));
 			householdDate.innerText = today.getFullYear()+"年"+('0'+(today.getMonth()+1)).slice(-2)+"月";

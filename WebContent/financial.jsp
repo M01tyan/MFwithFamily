@@ -374,8 +374,10 @@ button:focus {
 				class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab delete-button">
 				<i class="material-icons">add</i>
 			</button>
+			<p class="financial__user"><%= v.getUserName()%></p>
+			<% } else {%>
+			<p class="financial__user"><%= v.getUserName()%></p>
 			<% } %>
-			<p class="financial__user"><%=v.getUserName()%></p>
 		</div>
 	<% } %>
 	<% if (personFinancial.size() != 0) { %>
@@ -392,7 +394,7 @@ button:focus {
 		%>
 		<div class="mdl-cell mdl-cell--4-col financial" style="background: #FE748D">
 			<p class="financial__balance">
-				¥<%=financial.getBalance()%></p>
+				¥<%=SendMail.comma(financial.getBalance())%></p>
 			<p class="financial__name"><%=financial.getFinancialName()%></p>
 			<%
 				if (user.getId() == financial.getUid()) {

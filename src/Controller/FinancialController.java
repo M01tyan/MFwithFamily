@@ -38,7 +38,7 @@ public class FinancialController extends HttpServlet {
 
 		try {
 			// 家族全員のor個別の口座情報を取得
-			List<Financial> financialList = id == 0 ? getFamilyFinancial(family.getId(), user.getId()) : getPersonalFinancial(userList.get(id).getId());
+			List<Financial> financialList = id == 0 ? getFamilyFinancial(family.getId(), user.getId()) : getPersonalFinancial(userList.get(id).getId(), user.getId());
 			// セッションに口座情報を保存
 			session.setAttribute("financialList", financialList);
 		} catch (ClassNotFoundException | SQLException e) {
@@ -110,7 +110,7 @@ public class FinancialController extends HttpServlet {
 	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
 	 * @throws SQLException 正しくSQLが実行されなかった場合
 	 */
-	private List<Financial> getPersonalFinancial(int uid) throws ClassNotFoundException, SQLException {
+	private List<Financial> getPersonalFinancial(int uid, int accessUid) throws ClassNotFoundException, SQLException {
 		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
@@ -129,7 +129,7 @@ public class FinancialController extends HttpServlet {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				// 取得した口座がアクセスしているユーザのものなら"あなた"に変更
-				String user_name = rs.getInt("user_id") == uid ? "あなた" : rs.getString("user_name");
+				String user_name = rs.getInt("user_id") == accessUid ? "あなた" : rs.getString("user_name");
 				financial.add(new Financial(rs.getInt("id"), rs.getString("financial_name"), user_name, rs.getInt("user_id"), rs.getInt("balance"), rs.getBoolean("publish")));
 			}
 		} catch (SQLException e) {
@@ -160,7 +160,8 @@ public class FinancialController extends HttpServlet {
 					+ "FROM users "
 					+ "INNER JOIN financial ON users.id = financial.user_id "
 					+ "WHERE CASE ? WHEN -1 THEN users.id = ? ELSE family_id = ? END "
-					+ "AND financial.target = true;");
+					+ "AND financial.target = true "
+					+ "ORDER BY users.id;");
 		) {
 			ps.setInt(1, familyId);
 			ps.setInt(2, uid);
