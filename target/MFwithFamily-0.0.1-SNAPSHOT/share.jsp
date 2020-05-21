@@ -327,18 +327,6 @@ h1 {
 			progressBar.style.cssText = "display: block;";
 		});
 
-		//submit時のローディング表示
-		const form = document.getElementById("form");
-		form.addEventListener('submit', () => {
-			const shareCode = document.getElementById("share-code").value;
-			if (share.length !== 10) {
-				event.preventDefault();
-			    alert("家族コードの形式が違います。");
-			} else {
-				progressBar.style.cssText = "display: block;";
-			}
-		});
-
 		//家族を削除する
 		var buttons = document.querySelectorAll('button');
 		buttons.forEach(button => {
@@ -359,6 +347,18 @@ h1 {
 				    }
 				  });
 			});
+		});
+
+		//submit時のローディング表示
+		const form = document.getElementById("form");
+		form.addEventListener('submit', event => {
+			const shareCode = document.getElementById("share-code").value;
+			if (share.length !== 10) {
+				event.preventDefault();
+			    alert("家族コードの形式が違います。");
+			} else {
+				progressBar.style.cssText = "display: block;";
+			}
 		});
 	</script>
 </body>

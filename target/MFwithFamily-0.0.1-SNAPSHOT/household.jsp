@@ -258,7 +258,7 @@ button:focus {
 	</form>
 	<form name="household_list">
 		<% for (Household household : householdList) { %>
-		<input type="hidden" name="date" value="<%= household.getDate().substring(0,10) %>">
+		<input type="hidden" name="date" value="<%= household.getDate() %>">
 		<input type="hidden" name="content" value="<%= household.getContent() %>">
 		<input type="hidden" name="price" value="<%= household.getPrice() %>">
 		<input type="hidden" name="financial" value="<%= household.getFinancial() %>">
@@ -485,7 +485,7 @@ button:focus {
 			%>
 
 			<tr class="<%= household.getTransfer() ? "is-transfer" : ""%>">
-				<td class="mdl-data-table__cell--non-numeric"><%=household.getDate().substring(0,10)%></td>
+				<td class="mdl-data-table__cell--non-numeric"><%=household.getDate()%></td>
 				<td class="mdl-data-table__cell--non-numeric"><%=household.getContent()%></td>
 				<td><%=SendMail.comma(household.getPrice())%></td>
 				<td class="mdl-data-table__cell--non-numeric"><%=household.getFinancial()%></td>
@@ -530,6 +530,7 @@ button:focus {
 				});
 			}
 		}
+		console.log(householdList);
 		const uid = document.user.id.value;
 		let financialFilter = financialList;
 
