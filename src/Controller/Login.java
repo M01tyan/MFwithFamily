@@ -128,6 +128,7 @@ public class Login extends HttpServlet {
 				user.setId((int) rs.getInt("id"));
 				user.setName(rs.getString("name"));
 				user.setEmailCertificate((boolean) rs.getBoolean("email_certificate"));
+				System.out.println(rs.getInt("family_id"));
 				family.setId((int) rs.getInt("family_id"));
 				family.setShareCode((String) rs.getString("share_code"));
 				session.setAttribute("family", family);

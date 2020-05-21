@@ -64,4 +64,8 @@ public class SendMail {
 		}
 		return code;
 	}
+
+	public static String comma(int price) {
+		return String.format("%,d", price);
+	}
 }

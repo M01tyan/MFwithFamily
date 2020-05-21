@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8" import="model.Financial" import="model.User"
-	import="java.util.*"%>
+	import="java.util.*" import="Component.SendMail"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -334,7 +334,7 @@ button:focus {
 		%>
 		<div class="mdl-cell mdl-cell--4-col financial">
 			<p class="financial__balance">
-				¥<%=v.getBalance()%></p>
+				¥<%=SendMail.comma(v.getBalance())%></p>
 			<p class="financial__name"><%=v.getFinancialName()%></p>
 			<%
 				if (user.getId() == v.getUid()) {
@@ -365,7 +365,7 @@ button:focus {
 	<% for (Financial v : personFinancial) { %>
 		<div class="mdl-cell mdl-cell--4-col financial">
 			<p class="financial__balance">
-				¥<%=v.getBalance()%></p>
+				¥<%=SendMail.comma(v.getBalance())%></p>
 			<p class="financial__name"><%=v.getFinancialName()%></p>
 			<%
 				if (user.getId() == v.getUid()) {
@@ -374,8 +374,10 @@ button:focus {
 				class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab delete-button">
 				<i class="material-icons">add</i>
 			</button>
+			<p class="financial__user"><%= v.getUserName()%></p>
+			<% } else {%>
+			<p class="financial__user"><%= v.getUserName()%></p>
 			<% } %>
-			<p class="financial__user"><%=v.getUserName()%></p>
 		</div>
 	<% } %>
 	<% if (personFinancial.size() != 0) { %>
@@ -392,7 +394,7 @@ button:focus {
 		%>
 		<div class="mdl-cell mdl-cell--4-col financial" style="background: #FE748D">
 			<p class="financial__balance">
-				¥<%=financial.getBalance()%></p>
+				¥<%=SendMail.comma(financial.getBalance())%></p>
 			<p class="financial__name"><%=financial.getFinancialName()%></p>
 			<%
 				if (user.getId() == financial.getUid()) {
@@ -421,14 +423,14 @@ button:focus {
 			<div
 				class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
 				<input class="mdl-textfield__input" type="text" id="name"
-					name="name"> <label class="mdl-textfield__label" for="name">口座名</label>
+					name="name" required> <label class="mdl-textfield__label" for="name">口座名</label>
 			</div>
 			<div
 				class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
 				<div style="display: flex; flex-direction: row;">
 					<p style="font-size: 30px; margin: auto;">¥</p>
 					<input class="mdl-textfield__input" type="number" id="balance"
-						name="balance" style="text-align: right;"> <label
+						name="balance" style="text-align: right;" maxlength='10' required> <label
 						class="mdl-textfield__label" for="balance"
 						style="padding-left: 20px; width: 95%;">残高</label>
 				</div>
@@ -470,7 +472,17 @@ button:focus {
 		//submit時のローディング表示
 		const form = document.getElementById("form");
 		form.addEventListener('submit', () => {
-			progressBar.style.cssText = "display: block;";
+			const name = document.getElementById("name").value;
+			const balance = document.getElementById("balance").value;
+			if (balance.length > 10) {
+				event.preventDefault();
+			    alert("残高の金額が大きすぎます。残高は10億円以内に設定してください。");
+			} else if (name.length > 20) {
+				event.preventDefault();
+				alert("口座の名前が長すぎます。口座名は20文字以内で設定してください。");
+			} else {
+				progressBar.style.cssText = "display: block;";
+			}
 		});
 
 		//公開チャックボックスを押した時の処理
@@ -493,6 +505,7 @@ button:focus {
 		      	dialog.showModal();
 		      	//はいボタンを押した時
 		      	document.getElementById("yes-button").addEventListener('click', event => {
+		      		progressBar.style.cssText = "display: block;";
 		      		const path = window.location.href.split("?");
 		      		$.ajax({
 						type    : "DELETE",

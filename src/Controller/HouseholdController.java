@@ -39,7 +39,7 @@ public class HouseholdController extends HttpServlet {
 			// 家族全体の口座を取得
 			List<Financial> financialList = getFinancial(family.getId(), user.getId());
 			// 家族全体の家計簿を取得
-			List<Household> householdList = getHousehold(family.getId(), user.getId());
+			List<Household> householdList = family.getId() == -1 ? getPersonalHousehold(user.getId()) : getHousehold(family.getId(), user.getId());
 			// セッションに口座情報と家計簿を保存
 			session.setAttribute("financialList", financialList);
 			session.setAttribute("householdList", householdList);
@@ -251,7 +251,7 @@ public class HouseholdController extends HttpServlet {
 	private List<Financial> getFinancial(int familyId, int uid) throws ClassNotFoundException, SQLException {
 		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		List<Financial> financial = new ArrayList<Financial>();
@@ -262,7 +262,8 @@ public class HouseholdController extends HttpServlet {
 					"FROM users " +
 					"INNER JOIN financial ON users.id = financial.user_id " +
 					"WHERE CASE ? WHEN -1 THEN users.id = ? ELSE family_id = ? END " +
-					"AND financial.target = true;");
+					"AND financial.target = true " +
+					"ORDER BY users.id;");
 		) {
 			ps.setInt(1, familyId);
 			ps.setInt(2, uid);
@@ -307,7 +308,7 @@ public class HouseholdController extends HttpServlet {
 	private boolean checkUniqueHouseholdId(String id) throws ClassNotFoundException, SQLException {
 		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		try (
@@ -343,7 +344,7 @@ public class HouseholdController extends HttpServlet {
 		List<Household> list = new ArrayList<Household>();
 		// DB接続
 		Class.forName("com.mysql.cj.jdbc.Driver");
-		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true";
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
 		String user = System.getenv("HEROKU_DB_USER");
 		String password = System.getenv("HEROKU_DB_PASSWORD");
 		try (
@@ -371,7 +372,66 @@ public class HouseholdController extends HttpServlet {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 				Household household = new Household();
-				household.setDate(rs.getString("date"));
+				household.setDate(rs.getString("date").substring(0,10));
+				household.setContent(rs.getString("content"));
+				household.setPrice(rs.getInt("price"));
+				household.setFinancial(rs.getString("name"));
+				household.setLargeItem(rs.getString("large_item"));
+				household.setMiddleItem(rs.getString("middle_item"));
+				household.setMemo(rs.getString("memo"));
+				household.setTransfer(rs.getBoolean("transfer"));
+				household.setId(rs.getString("id"));
+				String userName = rs.getInt("user_id") == uid ? "あなた" : rs.getString("user_name");
+				household.setUserName(userName);
+				list.add(household);
+			}
+		} catch (SQLException e) {
+			System.out.println("SQL ERROR: " + e);
+		}
+		return list;
+	}
+
+	/**
+	 * 個人の家計簿を取得メソッド
+	 * MySQL上のhouseholdテーブルからuser_idが同じ家計簿を取得
+	 * @param uid ユーザID
+	 * @return 家計簿一覧
+	 * @throws SQLException 正しくSQLが実行されなかった場合
+	 * @throws ClassNotFoundException jdbcドライバが存在しない場合
+	 */
+	private List<Household> getPersonalHousehold(int uid) throws ClassNotFoundException, SQLException {
+		List<Household> list = new ArrayList<Household>();
+		// DB接続
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		String url = "jdbc:" + System.getenv("HEROKU_DB_URL") + "?reconnect=true&verifyServerCertificate=false&useSSL=true&characterEncoding=utf8";
+		String user = System.getenv("HEROKU_DB_USER");
+		String password = System.getenv("HEROKU_DB_PASSWORD");
+		try (
+			Connection conn = DriverManager.getConnection(url, user, password);
+			PreparedStatement ps =
+			conn.prepareStatement("SELECT "
+					+ "date, "
+					+ "content, "
+					+ "price, "
+					+ "financial.name, "
+					+ "large_item, "
+					+ "middle_item, "
+					+ "memo, "
+					+ "transfer, "
+					+ "household.id, "
+					+ "users.name AS user_name,"
+					+ "household.user_id "
+					+ "FROM household "
+					+ "JOIN users ON users.id = household.user_id "
+					+ "JOIN financial ON financial.id = household.financial_id "
+					+ "WHERE household.user_id = ? "
+					+ "ORDER BY date DESC;");
+		) {
+			ps.setInt(1, uid);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				Household household = new Household();
+				household.setDate(rs.getString("date").substring(0,10));
 				household.setContent(rs.getString("content"));
 				household.setPrice(rs.getInt("price"));
 				household.setFinancial(rs.getString("name"));
