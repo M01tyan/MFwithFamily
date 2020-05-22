@@ -512,8 +512,7 @@ button:focus {
 			});
 		}
 		let householdList = [];
-		console.log(document.household_list.data !== undefined)
-		if (document.household_list.data !== undefined) {
+		if (document.household_list.date !== undefined) {
 			for (let i=0; i<document.household_list.date.length; i++) {
 				householdList.push({
 					date: document.household_list.date[i].value,

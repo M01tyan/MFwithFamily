@@ -280,9 +280,9 @@ h1 {
 	<% String message = (String)request.getAttribute("message"); %>
 	<span style="color: red"><%= message == null ? "" : message %></span>
 	<p style="font-size: 20px; color: orange; margin-top: 60px;">おうちに入る</p>
-	<form name="inputShareCode" action="share" method="post" class="share-code__input">
+	<form name="inputShareCode" action="share" method="post" class="share-code__input" id="form">
 		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-	    	<input class="mdl-textfield__input" type="text" id="share-code" name="inputShareCode" style="padding-bottom: 20px;">
+	    	<input class="mdl-textfield__input" type="text" id="share-code" name="inputShareCode" style="padding-top: 20px;" pattern="[a-zA-Z0-9]">
 	    	<label class="mdl-textfield__label" for="share-code">家族コードの入力</label>
 		</div>
 		<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--1-col" style="text-align: left; margin-top: 27px;">
@@ -319,16 +319,6 @@ h1 {
 		</div>
 	</div>
 	<% } %>
-	<%-- <div style="display: flex; flex-direction: row">
-		<% if (userList.get(i).getId()==user.getId()) { %>
-		<p>あなた</p>
-		<% } %>
-		<p><%= userList.get(i).getName() %></p>
-		<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" id="${userList.get(i).getId()}">
-	  		連携解除
-	  	</button>
-
-	</div> --%>
 	<script>
 		//戻るボタンを押したときのローディング表示
 		const backButton = document.getElementById("back-button");
@@ -337,9 +327,23 @@ h1 {
 			progressBar.style.cssText = "display: block;";
 		});
 
+		//submit時のローディング表示
+		const form = document.getElementById("form");
+		form.addEventListener('submit', () => {
+			const shareCode = document.getElementById("share-code").value;
+			if (share.length !== 10) {
+				event.preventDefault();
+			    alert("家族コードの形式が違います。");
+			} else {
+				progressBar.style.cssText = "display: block;";
+			}
+		});
+
+		//家族を削除する
 		var buttons = document.querySelectorAll('button');
 		buttons.forEach(button => {
 			button.addEventListener('click', event => {
+				progressBar.style.cssText = "display: block;";
 				index = [].slice.call(buttons).indexOf(button);
 				$.ajax({
 					type    : "DELETE",
