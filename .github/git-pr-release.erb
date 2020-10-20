@@ -5,15 +5,3 @@ PR_url： <%= "##{release_pull_request.pr.number}" %>
 <% pull_requests.each do |pr| -%>
 <%= "##{pr.pr.number} #{pr.pr.title} @#{pr.pr.user.login}" %>
 <% end -%>
-
-stg確認はしましたか？
-<% pull_requests.each do |pr| -%>
-    <%= check_box_tag :pr.pr.number %>
-    <%= label_tag :pr.pr.number "##{pr.pr.number} #{pr.pr.title} @#{pr.pr.user.login}" %>
-<% end -%>
-
-stg確認はしましたか？
-<% pull_requests.each do |pr| -%>
-    <%= check_box_tag :pr.pr.number %>
-    <%= label_tag :pr.pr.number "##{pr.pr.number} #{pr.pr.title} @#{pr.pr.user.login}" %>
-<% end -%>
