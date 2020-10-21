@@ -8,6 +8,15 @@ PR_url： <%= "##{release_pull_request.pr.number}" %>
 
 
 stg確認はしましたか？
+stg確認が完了した場合はチェックを入れてください。
 <% pull_requests.each do |pr| -%>
   <%= pr.to_checklist_item %>
 <% end -%>
+
+## リリース後確認
+- account_web チャンネルでリリースすることを告知する
+- 本番リリースする
+- release_prod チャンネルでリリース完了を確認する
+- 対応した金融機関でテストを行う
+- 上記以外の金融機関でもテストを行う
+- #account_rollbarをしばらく監視する
